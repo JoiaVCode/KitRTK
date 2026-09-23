@@ -1,0 +1,2004 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Controle de Kits</title>
+<style>
+:root {
+    --bg: #f4f6f8;
+    --surface: #ffffff;
+    --surface-2: #f8fafc;
+    --border: #dfe4ea;
+    --text: #17202a;
+    --muted: #68737d;
+    --primary: #263746;
+    --primary-hover: #1c2a36;
+    --success: #198754;
+    --success-bg: #eaf7ef;
+    --warning: #b7791f;
+    --warning-bg: #fff7e6;
+    --danger: #c0392b;
+    --danger-bg: #fdeeee;
+    --shadow: 0 2px 10px rgba(23, 32, 42, 0.06);
+    --radius: 10px;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 14px;
+}
+
+button,
+input,
+select {
+    font: inherit;
+}
+
+button {
+    cursor: pointer;
+}
+
+.app {
+    min-height: 100vh;
+}
+
+.header {
+    background: var(--primary);
+    color: #fff;
+    padding: 18px 24px;
+}
+
+.header-inner {
+    max-width: 1400px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+.brand h1 {
+    margin: 0;
+    font-size: 21px;
+    font-weight: 700;
+}
+
+.brand p {
+    margin: 5px 0 0;
+    color: #c8d1d9;
+    font-size: 12px;
+}
+
+.header-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.btn {
+    border: 1px solid transparent;
+    border-radius: 7px;
+    padding: 9px 13px;
+    font-weight: 600;
+    transition: 0.15s ease;
+}
+
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.btn-primary {
+    background: var(--primary);
+    color: #fff;
+}
+
+.btn-primary:hover:not(:disabled) {
+    background: var(--primary-hover);
+}
+
+.header .btn-primary {
+    background: #fff;
+    color: var(--primary);
+}
+
+.header .btn-primary:hover {
+    background: #edf1f4;
+}
+
+.btn-secondary {
+    background: #fff;
+    color: var(--text);
+    border-color: var(--border);
+}
+
+.btn-secondary:hover:not(:disabled) {
+    background: #f3f5f7;
+}
+
+.btn-danger {
+    background: #fff;
+    color: var(--danger);
+    border-color: #e8b9b4;
+}
+
+.btn-danger:hover {
+    background: var(--danger-bg);
+}
+
+.btn-success {
+    background: var(--success);
+    color: #fff;
+}
+
+.btn-success:hover:not(:disabled) {
+    filter: brightness(0.94);
+}
+
+.main {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 22px 24px 40px;
+}
+
+.dashboard {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin-bottom: 22px;
+}
+
+.stat {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 17px;
+    box-shadow: var(--shadow);
+}
+
+.stat-label {
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.stat-value {
+    margin-top: 7px;
+    font-size: 27px;
+    font-weight: 700;
+}
+
+.nav {
+    display: flex;
+    gap: 4px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 5px;
+    margin-bottom: 18px;
+    box-shadow: var(--shadow);
+}
+
+.nav-btn {
+    flex: 1;
+    border: 0;
+    background: transparent;
+    color: var(--muted);
+    border-radius: 7px;
+    padding: 11px 14px;
+    font-weight: 700;
+}
+
+.nav-btn:hover {
+    background: var(--surface-2);
+    color: var(--text);
+}
+
+.nav-btn.active {
+    background: var(--primary);
+    color: #fff;
+}
+
+.view {
+    display: none;
+}
+
+.view.active {
+    display: block;
+}
+
+.section-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.section-title h2 {
+    margin: 0;
+    font-size: 20px;
+}
+
+.section-title p {
+    margin: 5px 0 0;
+    color: var(--muted);
+    font-size: 13px;
+}
+
+.panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+}
+
+.panel + .panel {
+    margin-top: 15px;
+}
+
+.panel-header {
+    padding: 16px 18px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+}
+
+.panel-header h3 {
+    margin: 0;
+    font-size: 15px;
+}
+
+.panel-body {
+    padding: 18px;
+}
+
+.toolbar {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.search {
+    position: relative;
+    flex: 1;
+    min-width: 220px;
+}
+
+.search input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    background: #fff;
+    color: var(--text);
+    outline: none;
+}
+
+.search input:focus,
+.form-control:focus {
+    border-color: #8b9aa7;
+    box-shadow: 0 0 0 3px rgba(38, 55, 70, 0.08);
+}
+
+.form-control {
+    width: 100%;
+    padding: 10px 11px;
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    background: #fff;
+    color: var(--text);
+    outline: none;
+}
+
+.filter {
+    min-width: 160px;
+}
+
+.table-wrap {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th,
+td {
+    text-align: left;
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+}
+
+th {
+    color: var(--muted);
+    background: var(--surface-2);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+tbody tr:hover {
+    background: #fafbfc;
+}
+
+.actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.action-btn {
+    border: 1px solid var(--border);
+    background: #fff;
+    color: var(--text);
+    border-radius: 6px;
+    padding: 6px 9px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.action-btn:hover {
+    background: var(--surface-2);
+}
+
+.action-btn.danger {
+    color: var(--danger);
+    border-color: #e8b9b4;
+}
+
+.action-btn.danger:hover {
+    background: var(--danger-bg);
+}
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 999px;
+    padding: 4px 8px;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.badge.available {
+    color: var(--success);
+    background: var(--success-bg);
+}
+
+.badge.kit {
+    color: var(--warning);
+    background: var(--warning-bg);
+}
+
+.empty {
+    padding: 45px 20px;
+    text-align: center;
+    color: var(--muted);
+}
+
+.empty strong {
+    display: block;
+    color: var(--text);
+    margin-bottom: 5px;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 13px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--muted);
+}
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 16px;
+}
+
+.kit-builder {
+    display: grid;
+    grid-template-columns: 1.25fr 0.75fr;
+    gap: 15px;
+}
+
+.builder-list {
+    max-height: 520px;
+    overflow-y: auto;
+}
+
+.equipment-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 13px 15px;
+    border-bottom: 1px solid var(--border);
+}
+
+.equipment-row:last-child {
+    border-bottom: 0;
+}
+
+.equipment-main {
+    min-width: 0;
+}
+
+.equipment-title {
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+
+.equipment-meta {
+    color: var(--muted);
+    font-size: 12px;
+}
+
+.selected-list {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+}
+
+.selected-item {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px;
+    background: var(--surface-2);
+}
+
+.selected-item-head {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.selected-item-title {
+    font-weight: 700;
+}
+
+.selected-item-meta {
+    margin-top: 5px;
+    color: var(--muted);
+    font-size: 12px;
+}
+
+.counter {
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.kits-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 15px;
+}
+
+.kit-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+}
+
+.kit-card-header {
+    padding: 15px 17px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.kit-id {
+    font-size: 17px;
+    font-weight: 700;
+}
+
+.kit-date {
+    margin-top: 4px;
+    color: var(--muted);
+    font-size: 12px;
+}
+
+.kit-card-body {
+    padding: 14px 17px;
+}
+
+.kit-equipment {
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.kit-equipment:first-child {
+    padding-top: 0;
+}
+
+.kit-equipment:last-child {
+    border-bottom: 0;
+    padding-bottom: 0;
+}
+
+.kit-equipment-name {
+    font-weight: 700;
+}
+
+.kit-equipment-details {
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.6;
+    margin-top: 3px;
+}
+
+.kit-card-footer {
+    padding: 12px 17px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: flex-end;
+    gap: 7px;
+}
+
+.modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 30, 0.52);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 18px;
+    z-index: 100;
+}
+
+.modal-backdrop.open {
+    display: flex;
+}
+
+.modal {
+    width: min(720px, 100%);
+    max-height: 90vh;
+    overflow-y: auto;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 15px 50px rgba(0, 0, 0, 0.2);
+}
+
+.modal.small {
+    width: min(430px, 100%);
+}
+
+.modal-header {
+    padding: 17px 19px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h3 {
+    margin: 0;
+    font-size: 17px;
+}
+
+.close {
+    width: 32px;
+    height: 32px;
+    border: 0;
+    background: transparent;
+    border-radius: 6px;
+    font-size: 20px;
+    color: var(--muted);
+}
+
+.close:hover {
+    background: var(--surface-2);
+}
+
+.modal-body {
+    padding: 19px;
+}
+
+.modal-footer {
+    padding: 14px 19px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+.modal-message {
+    color: var(--muted);
+    line-height: 1.55;
+}
+
+.edit-equipment-list {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+    margin-bottom: 15px;
+}
+
+.edit-equipment-item {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 11px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.edit-equipment-item .info {
+    min-width: 0;
+}
+
+.add-equipment-area {
+    border-top: 1px solid var(--border);
+    padding-top: 15px;
+}
+
+.add-equipment-area h4 {
+    margin: 0 0 9px;
+    font-size: 13px;
+}
+
+.settings-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 13px;
+}
+
+.file-input {
+    display: none;
+}
+
+.toast-container {
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    z-index: 200;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: min(360px, calc(100vw - 40px));
+}
+
+.toast {
+    background: #202a33;
+    color: #fff;
+    border-radius: 8px;
+    padding: 12px 14px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.18);
+    font-size: 13px;
+    animation: toast-in 0.15s ease;
+}
+
+.toast.success {
+    border-left: 4px solid #2fb36f;
+}
+
+.toast.error {
+    border-left: 4px solid #e25548;
+}
+
+@keyframes toast-in {
+    from {
+        transform: translateY(8px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@media (max-width: 1000px) {
+    .dashboard {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .kit-builder {
+        grid-template-columns: 1fr;
+    }
+
+    .kits-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .form-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 650px) {
+    .header {
+        padding: 15px;
+    }
+
+    .header-inner {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .header-actions {
+        width: 100%;
+    }
+
+    .header-actions .btn {
+        flex: 1;
+    }
+
+    .main {
+        padding: 15px 12px 30px;
+    }
+
+    .dashboard {
+        gap: 9px;
+    }
+
+    .stat {
+        padding: 13px;
+    }
+
+    .stat-value {
+        font-size: 23px;
+    }
+
+    .nav {
+        overflow-x: auto;
+    }
+
+    .nav-btn {
+        min-width: 120px;
+    }
+
+    .section-head {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .form-grid,
+    .settings-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .panel-body {
+        padding: 14px;
+    }
+
+    .toolbar {
+        flex-direction: column;
+    }
+
+    .search,
+    .filter {
+        min-width: 100%;
+    }
+
+    .table-wrap {
+        margin: 0 -14px;
+    }
+
+    th,
+    td {
+        padding: 10px;
+    }
+
+    .kit-card-footer {
+        flex-direction: column;
+    }
+
+    .kit-card-footer .btn {
+        width: 100%;
+    }
+}
+</style>
+</head>
+<body>
+<div class="app">
+    <header class="header">
+        <div class="header-inner">
+            <div class="brand">
+                <h1>Controle de Kits</h1>
+                <p>Organização de equipamentos de estoque</p>
+            </div>
+            <div class="header-actions">
+                <button class="btn btn-primary" id="exportBtn">Exportar dados</button>
+                <button class="btn btn-primary" id="importBtn">Importar dados</button>
+                <input class="file-input" type="file" id="importFile" accept=".json,application/json">
+            </div>
+        </div>
+    </header>
+
+    <main class="main">
+        <section class="dashboard">
+            <div class="stat">
+                <div class="stat-label">Equipamentos</div>
+                <div class="stat-value" id="statTotal">0</div>
+            </div>
+            <div class="stat">
+                <div class="stat-label">Disponíveis</div>
+                <div class="stat-value" id="statAvailable">0</div>
+            </div>
+            <div class="stat">
+                <div class="stat-label">Em kits</div>
+                <div class="stat-value" id="statInKits">0</div>
+            </div>
+            <div class="stat">
+                <div class="stat-label">Kits ativos</div>
+                <div class="stat-value" id="statKits">0</div>
+            </div>
+        </section>
+
+        <nav class="nav">
+            <button class="nav-btn active" data-view="equipamentos">Equipamentos</button>
+            <button class="nav-btn" data-view="montar">Montar Kit</button>
+            <button class="nav-btn" data-view="kits">Kits Ativos</button>
+            <button class="nav-btn" data-view="dados">Dados</button>
+        </nav>
+
+        <section class="view active" id="view-equipamentos">
+            <div class="section-head">
+                <div class="section-title">
+                    <h2>Equipamentos</h2>
+                    <p>Cadastre e consulte as unidades disponíveis no estoque.</p>
+                </div>
+                <button class="btn btn-primary" id="newEquipmentBtn">+ Novo equipamento</button>
+            </div>
+
+            <div class="panel">
+                <div class="panel-body">
+                    <div class="toolbar">
+                        <div class="search">
+                            <input type="text" id="equipmentSearch" placeholder="Buscar por código, local, produto ou série...">
+                        </div>
+                        <select class="form-control filter" id="equipmentFilter">
+                            <option value="all">Todos</option>
+                            <option value="available">Disponíveis</option>
+                            <option value="kit">Em kit</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Código</th>
+                                <th>Local</th>
+                                <th>Produto</th>
+                                <th>Série</th>
+                                <th>Status</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="equipmentTable"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <section class="view" id="view-montar">
+            <div class="section-head">
+                <div class="section-title">
+                    <h2>Montar Kit</h2>
+                    <p>Selecione os equipamentos disponíveis para criar um novo kit.</p>
+                </div>
+            </div>
+
+            <div class="kit-builder">
+                <div class="panel">
+                    <div class="panel-header">
+                        <h3>Equipamentos disponíveis</h3>
+                        <div class="search" style="max-width:280px;">
+                            <input type="text" id="builderSearch" placeholder="Pesquisar...">
+                        </div>
+                    </div>
+                    <div class="builder-list" id="builderList"></div>
+                </div>
+
+                <div class="panel">
+                    <div class="panel-header">
+                        <h3>Novo kit</h3>
+                        <span class="counter" id="selectionCounter">0/2</span>
+                    </div>
+                    <div class="panel-body">
+                        <div class="selected-list" id="selectedList"></div>
+                        <div class="form-actions">
+                            <button class="btn btn-secondary" id="clearSelectionBtn">Limpar</button>
+                            <button class="btn btn-success" id="createKitBtn" disabled>Criar kit</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="view" id="view-kits">
+            <div class="section-head">
+                <div class="section-title">
+                    <h2>Kits Ativos</h2>
+                    <p>Consulte, edite ou desmonte os kits atualmente organizados.</p>
+                </div>
+                <button class="btn btn-primary" id="goBuildBtn">+ Montar novo kit</button>
+            </div>
+
+            <div class="kits-grid" id="kitsGrid"></div>
+        </section>
+
+        <section class="view" id="view-dados">
+            <div class="section-head">
+                <div class="section-title">
+                    <h2>Dados</h2>
+                    <p>Gerencie o backup local das informações armazenadas neste navegador.</p>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-header">
+                    <h3>Backup e restauração</h3>
+                </div>
+                <div class="panel-body">
+                    <div class="settings-grid">
+                        <button class="btn btn-secondary" id="exportBtn2">Exportar dados em JSON</button>
+                        <button class="btn btn-secondary" id="importBtn2">Importar dados de JSON</button>
+                        <button class="btn btn-danger" id="clearDataBtn">Limpar todos os dados</button>
+                    </div>
+                    <input class="file-input" type="file" id="importFile2" accept=".json,application/json">
+                </div>
+            </div>
+        </section>
+    </main>
+</div>
+
+<div class="modal-backdrop" id="equipmentModal">
+    <div class="modal">
+        <div class="modal-header">
+            <h3 id="equipmentModalTitle">Novo equipamento</h3>
+            <button class="close" data-close="equipmentModal">&times;</button>
+        </div>
+        <div class="modal-body">
+            <form id="equipmentForm">
+                <input type="hidden" id="equipmentId">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="equipmentCode">Código</label>
+                        <input class="form-control" id="equipmentCode" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="equipmentLocation">Local</label>
+                        <input class="form-control" id="equipmentLocation" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="equipmentName">Nome do Produto</label>
+                        <input class="form-control" id="equipmentName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="equipmentSerial">Série</label>
+                        <input class="form-control" id="equipmentSerial" required>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" data-close="equipmentModal">Cancelar</button>
+            <button class="btn btn-primary" id="saveEquipmentBtn">Salvar</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal-backdrop" id="kitModal">
+    <div class="modal">
+        <div class="modal-header">
+            <h3 id="kitModalTitle">Editar kit</h3>
+            <button class="close" data-close="kitModal">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="edit-equipment-list" id="editEquipmentList"></div>
+            <div class="add-equipment-area">
+                <h4>Adicionar equipamento disponível</h4>
+                <div class="search">
+                    <input type="text" id="editKitSearch" placeholder="Pesquisar por código, produto ou série...">
+                </div>
+                <div class="builder-list" id="editKitAvailable" style="margin-top:9px;max-height:230px;border:1px solid var(--border);border-radius:8px;"></div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" data-close="kitModal">Cancelar</button>
+            <button class="btn btn-primary" id="saveKitBtn">Salvar alterações</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal-backdrop" id="confirmModal">
+    <div class="modal small">
+        <div class="modal-header">
+            <h3 id="confirmTitle">Confirmar ação</h3>
+            <button class="close" data-close="confirmModal">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="modal-message" id="confirmMessage"></div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" data-close="confirmModal">Cancelar</button>
+            <button class="btn btn-danger" id="confirmActionBtn">Confirmar</button>
+        </div>
+    </div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+const CONFIG = {
+    KIT_SIZE: 2,
+    STORAGE_KEY: "controle_kits_v1"
+};
+
+let state = {
+    equipments: [],
+    kits: [],
+    nextKitNumber: 1
+};
+
+let selectedEquipmentIds = [];
+let editingKitId = null;
+let confirmCallback = null;
+
+const $ = (id) => document.getElementById(id);
+
+function generateId(prefix = "id") {
+    return prefix + "_" + Date.now().toString(36) + "_" + Math.random().toString(36).slice(2, 9);
+}
+
+function saveState() {
+    localStorage.setItem(CONFIG.STORAGE_KEY, JSON.stringify(state));
+}
+
+function loadState() {
+    try {
+        const saved = localStorage.getItem(CONFIG.STORAGE_KEY);
+        if (!saved) return;
+
+        const parsed = JSON.parse(saved);
+
+        if (!parsed || typeof parsed !== "object") return;
+
+        state.equipments = Array.isArray(parsed.equipments) ? parsed.equipments : [];
+        state.kits = Array.isArray(parsed.kits) ? parsed.kits : [];
+        state.nextKitNumber = Number(parsed.nextKitNumber) || calculateNextKitNumber();
+
+        state.equipments.forEach(equipment => {
+            equipment.id = equipment.id || generateId("eq");
+        });
+
+        normalizeState();
+    } catch {
+        showToast("Não foi possível carregar os dados salvos.", "error");
+    }
+}
+
+function normalizeState() {
+    const validEquipmentIds = new Set(state.equipments.map(e => e.id));
+
+    state.kits = state.kits.filter(kit => {
+        if (!Array.isArray(kit.equipmentIds)) return false;
+        kit.equipmentIds = kit.equipmentIds.filter(id => validEquipmentIds.has(id));
+        return kit.equipmentIds.length > 0;
+    });
+
+    const used = new Set();
+
+    state.kits.forEach(kit => {
+        kit.equipmentIds = kit.equipmentIds.filter(id => {
+            if (used.has(id)) return false;
+            used.add(id);
+            return true;
+        });
+    });
+
+    saveState();
+}
+
+function calculateNextKitNumber() {
+    let highest = 0;
+
+    state.kits.forEach(kit => {
+        const match = String(kit.id || "").match(/^KIT-(\d+)$/);
+        if (match) highest = Math.max(highest, Number(match[1]));
+    });
+
+    return highest + 1;
+}
+
+function createKitId() {
+    const id = "KIT-" + String(state.nextKitNumber).padStart(3, "0");
+    state.nextKitNumber++;
+    return id;
+}
+
+function getEquipment(id) {
+    return state.equipments.find(e => e.id === id);
+}
+
+function getKitForEquipment(id) {
+    return state.kits.find(kit => kit.equipmentIds.includes(id));
+}
+
+function isEquipmentInKit(id) {
+    return Boolean(getKitForEquipment(id));
+}
+
+function formatDate(dateValue) {
+    const date = new Date(dateValue);
+
+    if (Number.isNaN(date.getTime())) return "-";
+
+    return date.toLocaleString("pt-BR", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit"
+    });
+}
+
+function escapeHtml(value) {
+    return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+}
+
+function showToast(message, type = "success") {
+    const toast = document.createElement("div");
+    toast.className = "toast " + type;
+    toast.textContent = message;
+
+    $("toastContainer").appendChild(toast);
+
+    setTimeout(() => {
+        toast.remove();
+    }, 3000);
+}
+
+function switchView(viewName) {
+    document.querySelectorAll(".nav-btn").forEach(btn => {
+        btn.classList.toggle("active", btn.dataset.view === viewName);
+    });
+
+    document.querySelectorAll(".view").forEach(view => {
+        view.classList.toggle("active", view.id === "view-" + viewName);
+    });
+
+    if (viewName === "equipamentos") renderEquipmentTable();
+    if (viewName === "montar") renderBuilder();
+    if (viewName === "kits") renderKits();
+}
+
+function updateDashboard() {
+    const total = state.equipments.length;
+    const inKits = state.equipments.filter(e => isEquipmentInKit(e.id)).length;
+
+    $("statTotal").textContent = total;
+    $("statAvailable").textContent = total - inKits;
+    $("statInKits").textContent = inKits;
+    $("statKits").textContent = state.kits.length;
+}
+
+function renderEquipmentTable() {
+    const tbody = $("equipmentTable");
+    const search = $("equipmentSearch").value.trim().toLowerCase();
+    const filter = $("equipmentFilter").value;
+
+    const filtered = state.equipments.filter(equipment => {
+        const kitStatus = isEquipmentInKit(equipment.id);
+        const matchesSearch =
+            !search ||
+            [equipment.code, equipment.location, equipment.name, equipment.serial]
+                .some(value => String(value).toLowerCase().includes(search));
+
+        const matchesFilter =
+            filter === "all" ||
+            (filter === "available" && !kitStatus) ||
+            (filter === "kit" && kitStatus);
+
+        return matchesSearch && matchesFilter;
+    });
+
+    if (!filtered.length) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="6">
+                    <div class="empty">
+                        <strong>Nenhum equipamento encontrado</strong>
+                        Cadastre um equipamento ou altere os filtros.
+                    </div>
+                </td>
+            </tr>
+        `;
+        return;
+    }
+
+    tbody.innerHTML = filtered.map(equipment => {
+        const kit = getKitForEquipment(equipment.id);
+        const inKit = Boolean(kit);
+
+        return `
+            <tr>
+                <td>${escapeHtml(equipment.code)}</td>
+                <td>${escapeHtml(equipment.location)}</td>
+                <td>${escapeHtml(equipment.name)}</td>
+                <td>${escapeHtml(equipment.serial)}</td>
+                <td>
+                    <span class="badge ${inKit ? "kit" : "available"}">
+                        ${inKit ? escapeHtml(kit.id) : "Disponível"}
+                    </span>
+                </td>
+                <td>
+                    <div class="actions">
+                        <button class="action-btn" onclick="openEquipmentModal('${equipment.id}')">Editar</button>
+                        <button class="action-btn danger" onclick="requestDeleteEquipment('${equipment.id}')">Excluir</button>
+                    </div>
+                </td>
+            </tr>
+        `;
+    }).join("");
+}
+
+function renderBuilder() {
+    const list = $("builderList");
+    const search = $("builderSearch").value.trim().toLowerCase();
+
+    const available = state.equipments.filter(equipment => {
+        if (isEquipmentInKit(equipment.id)) return false;
+
+        if (!search) return true;
+
+        return [equipment.code, equipment.location, equipment.name, equipment.serial]
+            .some(value => String(value).toLowerCase().includes(search));
+    });
+
+    if (!available.length) {
+        list.innerHTML = `
+            <div class="empty">
+                <strong>Nenhum equipamento disponível</strong>
+                Cadastre equipamentos ou libere equipamentos de outros kits.
+            </div>
+        `;
+    } else {
+        list.innerHTML = available.map(equipment => {
+            const selected = selectedEquipmentIds.includes(equipment.id);
+
+            return `
+                <div class="equipment-row">
+                    <div class="equipment-main">
+                        <div class="equipment-title">${escapeHtml(equipment.name)}</div>
+                        <div class="equipment-meta">
+                            Código: ${escapeHtml(equipment.code)}
+                            · Local: ${escapeHtml(equipment.location)}
+                            · Série: ${escapeHtml(equipment.serial)}
+                        </div>
+                    </div>
+                    <button class="btn ${selected ? "btn-secondary" : "btn-primary"}"
+                            onclick="toggleSelection('${equipment.id}')"
+                            ${selected ? "disabled" : ""}>
+                        ${selected ? "Selecionado" : "+"}
+                    </button>
+                </div>
+            `;
+        }).join("");
+    }
+
+    renderSelected();
+}
+
+function renderSelected() {
+    const list = $("selectedList");
+    const counter = $("selectionCounter");
+    const createBtn = $("createKitBtn");
+
+    counter.textContent = `${selectedEquipmentIds.length}/${CONFIG.KIT_SIZE}`;
+    createBtn.disabled = selectedEquipmentIds.length !== CONFIG.KIT_SIZE;
+
+    if (!selectedEquipmentIds.length) {
+        list.innerHTML = `
+            <div class="empty" style="padding:30px 10px;">
+                <strong>Nenhum equipamento selecionado</strong>
+                Selecione ${CONFIG.KIT_SIZE} equipamentos.
+            </div>
+        `;
+        return;
+    }
+
+    list.innerHTML = selectedEquipmentIds.map((id, index) => {
+        const equipment = getEquipment(id);
+
+        if (!equipment) return "";
+
+        return `
+            <div class="selected-item">
+                <div class="selected-item-head">
+                    <div class="selected-item-title">${index + 1}. ${escapeHtml(equipment.name)}</div>
+                    <button class="action-btn danger" onclick="removeSelection('${equipment.id}')">Remover</button>
+                </div>
+                <div class="selected-item-meta">
+                    Código: ${escapeHtml(equipment.code)} ·
+                    Local: ${escapeHtml(equipment.location)} ·
+                    Série: ${escapeHtml(equipment.serial)}
+                </div>
+            </div>
+        `;
+    }).join("");
+}
+
+function toggleSelection(id) {
+    if (selectedEquipmentIds.includes(id)) return;
+
+    if (selectedEquipmentIds.length >= CONFIG.KIT_SIZE) {
+        showToast(`Um kit pode ter no máximo ${CONFIG.KIT_SIZE} equipamentos.`, "error");
+        return;
+    }
+
+    if (isEquipmentInKit(id)) {
+        showToast("Este equipamento já está em um kit.", "error");
+        return;
+    }
+
+    selectedEquipmentIds.push(id);
+    renderBuilder();
+}
+
+function removeSelection(id) {
+    selectedEquipmentIds = selectedEquipmentIds.filter(item => item !== id);
+    renderBuilder();
+}
+
+function clearSelection() {
+    selectedEquipmentIds = [];
+    renderBuilder();
+}
+
+function createKit() {
+    if (selectedEquipmentIds.length !== CONFIG.KIT_SIZE) {
+        showToast(`Selecione exatamente ${CONFIG.KIT_SIZE} equipamentos.`, "error");
+        return;
+    }
+
+    if (selectedEquipmentIds.some(isEquipmentInKit)) {
+        showToast("Um dos equipamentos selecionados já está em outro kit.", "error");
+        renderBuilder();
+        return;
+    }
+
+    const kit = {
+        id: createKitId(),
+        createdAt: new Date().toISOString(),
+        equipmentIds: [...selectedEquipmentIds]
+    };
+
+    state.kits.push(kit);
+    saveState();
+
+    selectedEquipmentIds = [];
+
+    updateDashboard();
+    renderBuilder();
+
+    showToast(`${kit.id} criado com sucesso.`);
+    switchView("kits");
+}
+
+function openEquipmentModal(id = null) {
+    $("equipmentForm").reset();
+    $("equipmentId").value = "";
+    $("equipmentModalTitle").textContent = id ? "Editar equipamento" : "Novo equipamento";
+
+    if (id) {
+        const equipment = getEquipment(id);
+
+        if (!equipment) return;
+
+        $("equipmentId").value = equipment.id;
+        $("equipmentCode").value = equipment.code;
+        $("equipmentLocation").value = equipment.location;
+        $("equipmentName").value = equipment.name;
+        $("equipmentSerial").value = equipment.serial;
+    }
+
+    openModal("equipmentModal");
+}
+
+function saveEquipment() {
+    const id = $("equipmentId").value.trim();
+    const code = $("equipmentCode").value.trim();
+    const location = $("equipmentLocation").value.trim();
+    const name = $("equipmentName").value.trim();
+    const serial = $("equipmentSerial").value.trim();
+
+    if (!code || !location || !name || !serial) {
+        showToast("Preencha todos os campos.", "error");
+        return;
+    }
+
+    const duplicateSerial = state.equipments.find(e =>
+        e.serial.toLowerCase() === serial.toLowerCase() && e.id !== id
+    );
+
+    if (duplicateSerial) {
+        showToast("Já existe um equipamento cadastrado com essa série.", "error");
+        return;
+    }
+
+    if (id) {
+        const equipment = getEquipment(id);
+
+        if (!equipment) return;
+
+        equipment.code = code;
+        equipment.location = location;
+        equipment.name = name;
+        equipment.serial = serial;
+
+        showToast("Equipamento atualizado.");
+    } else {
+        state.equipments.push({
+            id: generateId("eq"),
+            code,
+            location,
+            name,
+            serial
+        });
+
+        showToast("Equipamento cadastrado.");
+    }
+
+    saveState();
+    updateDashboard();
+    renderEquipmentTable();
+    renderBuilder();
+    closeModal("equipmentModal");
+}
+
+function requestDeleteEquipment(id) {
+    const equipment = getEquipment(id);
+
+    if (!equipment) return;
+
+    if (isEquipmentInKit(id)) {
+        const kit = getKitForEquipment(id);
+        showToast(`Remova o equipamento do ${kit.id} antes de excluí-lo.`, "error");
+        return;
+    }
+
+    openConfirm(
+        "Excluir equipamento?",
+        `O equipamento "${equipment.name}" de série ${equipment.serial} será excluído permanentemente.`,
+        () => deleteEquipment(id)
+    );
+}
+
+function deleteEquipment(id) {
+    state.equipments = state.equipments.filter(e => e.id !== id);
+    saveState();
+
+    updateDashboard();
+    renderEquipmentTable();
+    renderBuilder();
+
+    showToast("Equipamento excluído.");
+}
+
+function renderKits() {
+    const grid = $("kitsGrid");
+
+    if (!state.kits.length) {
+        grid.innerHTML = `
+            <div class="panel" style="grid-column:1/-1;">
+                <div class="empty">
+                    <strong>Nenhum kit ativo</strong>
+                    Monte um kit para começar a organizar os equipamentos.
+                </div>
+            </div>
+        `;
+        return;
+    }
+
+    grid.innerHTML = state.kits.map(kit => {
+        const equipments = kit.equipmentIds.map(getEquipment).filter(Boolean);
+
+        return `
+            <article class="kit-card">
+                <div class="kit-card-header">
+                    <div>
+                        <div class="kit-id">${escapeHtml(kit.id)}</div>
+                        <div class="kit-date">Criado em: ${formatDate(kit.createdAt)}</div>
+                    </div>
+                    <span class="badge kit">${equipments.length}/${CONFIG.KIT_SIZE}</span>
+                </div>
+
+                <div class="kit-card-body">
+                    ${equipments.map((equipment, index) => `
+                        <div class="kit-equipment">
+                            <div class="kit-equipment-name">
+                                Equipamento ${index + 1}: ${escapeHtml(equipment.name)}
+                            </div>
+                            <div class="kit-equipment-details">
+                                Código: ${escapeHtml(equipment.code)}<br>
+                                Local: ${escapeHtml(equipment.location)}<br>
+                                Série: ${escapeHtml(equipment.serial)}
+                            </div>
+                        </div>
+                    `).join("")}
+                </div>
+
+                <div class="kit-card-footer">
+                    <button class="btn btn-secondary" onclick="openKitModal('${kit.id}')">Editar kit</button>
+                    <button class="btn btn-danger" onclick="requestDisassembleKit('${kit.id}')">Desmontar kit</button>
+                </div>
+            </article>
+        `;
+    }).join("");
+}
+
+function openKitModal(kitId) {
+    const kit = state.kits.find(item => item.id === kitId);
+
+    if (!kit) return;
+
+    editingKitId = kitId;
+    $("kitModalTitle").textContent = `Editar ${kit.id}`;
+    $("editKitSearch").value = "";
+
+    renderEditKit();
+    openModal("kitModal");
+}
+
+function renderEditKit() {
+    const kit = state.kits.find(item => item.id === editingKitId);
+
+    if (!kit) return;
+
+    const list = $("editEquipmentList");
+
+    list.innerHTML = kit.equipmentIds.map(id => {
+        const equipment = getEquipment(id);
+
+        if (!equipment) return "";
+
+        return `
+            <div class="edit-equipment-item">
+                <div class="info">
+                    <strong>${escapeHtml(equipment.name)}</strong>
+                    <div class="equipment-meta">
+                        Código: ${escapeHtml(equipment.code)}
+                        · Local: ${escapeHtml(equipment.location)}
+                        · Série: ${escapeHtml(equipment.serial)}
+                    </div>
+                </div>
+                <button class="action-btn danger" onclick="removeFromEditingKit('${id}')">Remover</button>
+            </div>
+        `;
+    }).join("");
+
+    renderEditKitAvailable();
+}
+
+function renderEditKitAvailable() {
+    const kit = state.kits.find(item => item.id === editingKitId);
+    const list = $("editKitAvailable");
+
+    if (!kit) return;
+
+    const search = $("editKitSearch").value.trim().toLowerCase();
+
+    const available = state.equipments.filter(equipment => {
+        if (kit.equipmentIds.includes(equipment.id)) return false;
+        if (isEquipmentInKit(equipment.id)) return false;
+
+        if (!search) return true;
+
+        return [equipment.code, equipment.location, equipment.name, equipment.serial]
+            .some(value => String(value).toLowerCase().includes(search));
+    });
+
+    if (kit.equipmentIds.length >= CONFIG.KIT_SIZE) {
+        list.innerHTML = `
+            <div class="empty" style="padding:25px 15px;">
+                <strong>Kit completo</strong>
+                Remova um equipamento para adicionar outro.
+            </div>
+        `;
+        return;
+    }
+
+    if (!available.length) {
+        list.innerHTML = `
+            <div class="empty" style="padding:25px 15px;">
+                <strong>Nenhum equipamento disponível</strong>
+                Não há equipamentos livres para adicionar.
+            </div>
+        `;
+        return;
+    }
+
+    list.innerHTML = available.map(equipment => `
+        <div class="equipment-row">
+            <div class="equipment-main">
+                <div class="equipment-title">${escapeHtml(equipment.name)}</div>
+                <div class="equipment-meta">
+                    Código: ${escapeHtml(equipment.code)}
+                    · Local: ${escapeHtml(equipment.location)}
+                    · Série: ${escapeHtml(equipment.serial)}
+                </div>
+            </div>
+            <button class="btn btn-primary" onclick="addToEditingKit('${equipment.id}')">+</button>
+        </div>
+    `).join("");
+}
+
+function removeFromEditingKit(equipmentId) {
+    const kit = state.kits.find(item => item.id === editingKitId);
+
+    if (!kit) return;
+
+    kit.equipmentIds = kit.equipmentIds.filter(id => id !== equipmentId);
+
+    saveState();
+    updateDashboard();
+    renderEditKit();
+    renderEquipmentTable();
+    renderBuilder();
+
+    showToast("Equipamento removido do kit.");
+}
+
+function addToEditingKit(equipmentId) {
+    const kit = state.kits.find(item => item.id === editingKitId);
+
+    if (!kit) return;
+
+    if (kit.equipmentIds.length >= CONFIG.KIT_SIZE) {
+        showToast(`O kit já possui ${CONFIG.KIT_SIZE} equipamentos.`, "error");
+        return;
+    }
+
+    if (isEquipmentInKit(equipmentId)) {
+        showToast("Este equipamento já está em outro kit.", "error");
+        return;
+    }
+
+    kit.equipmentIds.push(equipmentId);
+
+    saveState();
+    updateDashboard();
+    renderEditKit();
+    renderEquipmentTable();
+    renderBuilder();
+
+    showToast("Equipamento adicionado ao kit.");
+}
+
+function saveKitChanges() {
+    const kit = state.kits.find(item => item.id === editingKitId);
+
+    if (!kit) return;
+
+    if (kit.equipmentIds.length !== CONFIG.KIT_SIZE) {
+        showToast(`O kit precisa ter exatamente ${CONFIG.KIT_SIZE} equipamentos.`, "error");
+        return;
+    }
+
+    saveState();
+    updateDashboard();
+    renderKits();
+    renderEquipmentTable();
+    renderBuilder();
+    closeModal("kitModal");
+
+    showToast("Kit atualizado.");
+}
+
+function requestDisassembleKit(kitId) {
+    const kit = state.kits.find(item => item.id === kitId);
+
+    if (!kit) return;
+
+    openConfirm(
+        `Desmontar ${kit.id}?`,
+        "Os equipamentos voltarão a ficar disponíveis individualmente.",
+        () => disassembleKit(kitId)
+    );
+}
+
+function disassembleKit(kitId) {
+    const kit = state.kits.find(item => item.id === kitId);
+
+    if (!kit) return;
+
+    state.kits = state.kits.filter(item => item.id !== kitId);
+
+    saveState();
+    updateDashboard();
+    renderKits();
+    renderEquipmentTable();
+    renderBuilder();
+
+    showToast(`${kitId} desmontado.`);
+}
+
+function openModal(id) {
+    $(id).classList.add("open");
+}
+
+function closeModal(id) {
+    $(id).classList.remove("open");
+}
+
+function openConfirm(title, message, callback) {
+    $("confirmTitle").textContent = title;
+    $("confirmMessage").textContent = message;
+    confirmCallback = callback;
+    openModal("confirmModal");
+}
+
+function executeConfirm() {
+    const callback = confirmCallback;
+    confirmCallback = null;
+    closeModal("confirmModal");
+
+    if (typeof callback === "function") {
+        callback();
+    }
+}
+
+function exportData() {
+    const data = {
+        version: 1,
+        exportedAt: new Date().toISOString(),
+        equipments: state.equipments,
+        kits: state.kits,
+        nextKitNumber: state.nextKitNumber
+    };
+
+    const blob = new Blob(
+        [JSON.stringify(data, null, 2)],
+        { type: "application/json" }
+    );
+
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+
+    link.href = url;
+    link.download = `backup-kits-${new Date().toISOString().slice(0, 10)}.json`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+
+    URL.revokeObjectURL(url);
+
+    showToast("Backup exportado.");
+}
+
+function importDataFromFile(file) {
+    if (!file) return;
+
+    const reader = new FileReader();
+
+    reader.onload = event => {
+        try {
+            const imported = JSON.parse(event.target.result);
+
+            if (
+                !imported ||
+                !Array.isArray(imported.equipments) ||
+                !Array.isArray(imported.kits)
+            ) {
+                throw new Error("Formato inválido");
+            }
+
+            const importedEquipments = imported.equipments.map(e => ({
+                id: e.id || generateId("eq"),
+                code: String(e.code ?? ""),
+                location: String(e.location ?? ""),
+                name: String(e.name ?? ""),
+                serial: String(e.serial ?? "")
+            }));
+
+            const serials = new Set();
+
+            for (const equipment of importedEquipments) {
+                const serialKey = equipment.serial.toLowerCase();
+
+                if (!equipment.serial || serials.has(serialKey)) {
+                    throw new Error("Existem séries duplicadas ou vazias.");
+                }
+
+                serials.add(serialKey);
+            }
+
+            const ids = new Set(importedEquipments.map(e => e.id));
+            const usedIds = new Set();
+
+            const importedKits = imported.kits.map(kit => {
+                const equipmentIds = Array.isArray(kit.equipmentIds)
+                    ? kit.equipmentIds.filter(id => ids.has(id))
+                    : [];
+
+                if (equipmentIds.length !== CONFIG.KIT_SIZE) {
+                    throw new Error("Existe um kit com quantidade inválida de equipamentos.");
+                }
+
+                for (const id of equipmentIds) {
+                    if (usedIds.has(id)) {
+                        throw new Error("Um equipamento aparece em mais de um kit.");
+                    }
+
+                    usedIds.add(id);
+                }
+
+                return {
+                    id: String(kit.id),
+                    createdAt: kit.createdAt || new Date().toISOString(),
+                    equipmentIds
+                };
+            });
+
+            const kitIds = new Set();
+
+            for (const kit of importedKits) {
+                if (!/^KIT-\d+$/.test(kit.id) || kitIds.has(kit.id)) {
+                    throw new Error("Existem identificadores de kits inválidos ou duplicados.");
+                }
+
+                kitIds.add(kit.id);
+            }
+
+            state = {
+                equipments: importedEquipments,
+                kits: importedKits,
+                nextKitNumber: Number(imported.nextKitNumber) || calculateNextKitNumber()
+            };
+
+            state.nextKitNumber = Math.max(
+                state.nextKitNumber,
+                calculateNextKitNumber()
+            );
+
+            saveState();
+            selectedEquipmentIds = [];
+
+            updateDashboard();
+            renderEquipmentTable();
+            renderBuilder();
+            renderKits();
+
+            showToast("Dados importados com sucesso.");
+        } catch {
+            showToast("Não foi possível importar este arquivo.", "error");
+        }
+    };
+
+    reader.readAsText(file);
+}
+
+function requestClearData() {
+    openConfirm(
+        "Limpar todos os dados?",
+        "Todos os equipamentos e kits serão apagados permanentemente deste navegador.",
+        clearAllData
+    );
+}
+
+function clearAllData() {
+    state = {
+        equipments: [],
+        kits: [],
+        nextKitNumber: 1
+    };
+
+    selectedEquipmentIds = [];
+
+    localStorage.removeItem(CONFIG.STORAGE_KEY);
+
+    updateDashboard();
+    renderEquipmentTable();
+    renderBuilder();
+    renderKits();
+
+    showToast("Todos os dados foram apagados.");
+}
+
+document.querySelectorAll(".nav-btn").forEach(button => {
+    button.addEventListener("click", () => switchView(button.dataset.view));
+});
+
+$("newEquipmentBtn").addEventListener("click", () => openEquipmentModal());
+$("saveEquipmentBtn").addEventListener("click", saveEquipment);
+
+$("equipmentSearch").addEventListener("input", renderEquipmentTable);
+$("equipmentFilter").addEventListener("change", renderEquipmentTable);
+
+$("builderSearch").addEventListener("input", renderBuilder);
+
+$("clearSelectionBtn").addEventListener("click", clearSelection);
+$("createKitBtn").addEventListener("click", createKit);
+
+$("goBuildBtn").addEventListener("click", () => switchView("montar"));
+
+$("editKitSearch").addEventListener("input", renderEditKitAvailable);
+$("saveKitBtn").addEventListener("click", saveKitChanges);
+
+$("exportBtn").addEventListener("click", exportData);
+$("exportBtn2").addEventListener("click", exportData);
+
+$("importBtn").addEventListener("click", () => $("importFile").click());
+$("importBtn2").addEventListener("click", () => $("importFile2").click());
+
+$("importFile").addEventListener("change", event => {
+    importDataFromFile(event.target.files[0]);
+    event.target.value = "";
+});
+
+$("importFile2").addEventListener("change", event => {
+    importDataFromFile(event.target.files[0]);
+    event.target.value = "";
+});
+
+$("clearDataBtn").addEventListener("click", requestClearData);
+$("confirmActionBtn").addEventListener("click", executeConfirm);
+
+document.querySelectorAll("[data-close]").forEach(button => {
+    button.addEventListener("click", () => closeModal(button.dataset.close));
+});
+
+document.querySelectorAll(".modal-backdrop").forEach(backdrop => {
+    backdrop.addEventListener("click", event => {
+        if (event.target === backdrop) {
+            closeModal(backdrop.id);
+        }
+    });
+});
+
+document.addEventListener("keydown", event => {
+    if (event.key === "Escape") {
+        document.querySelectorAll(".modal-backdrop.open").forEach(modal => {
+            closeModal(modal.id);
+        });
+    }
+});
+
+loadState();
+updateDashboard();
+renderEquipmentTable();
+renderBuilder();
+renderKits();
+</script>
+</body>
+</html>
