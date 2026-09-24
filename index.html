@@ -128,12 +128,17 @@ button,input,select{font:inherit}button{cursor:pointer}
 <div class="app">
 <header class="header"><div class="header-inner"><div class="brand"><h1>Controle de Kits</h1><p>Organização e controle de equipamentos de estoque</p></div><div class="header-actions"><button class="btn" onclick="exportData()">EXPORTAR</button><button class="btn" onclick="document.getElementById('importFile').click()">IMPORTAR</button><input id="importFile" type="file" accept="application/json" hidden onchange="importData(event)"></div></div></header>
 <main class="container">
-<nav class="nav"><button class="active" data-page="equipamentos">Equipamentos</button><button data-page="montar">Montar Kit</button><button data-page="kits">Kits Ativos</button><button data-page="dados">Dados</button></nav>
+<nav class="nav"><button class="active" data-page="equipamentos">Equipamentos</button><button data-page="produtos">Produtos</button><button data-page="montar">Montar Kit</button><button data-page="kits">Kits Ativos</button><button data-page="dados">Dados</button></nav>
 <section id="equipamentos" class="page active">
 <div class="page-title"><div><h2>Equipamentos</h2><p>Cadastre, pesquise e acompanhe os equipamentos do estoque.</p></div><button class="btn btn-primary" onclick="openEquipmentModal()">+ CADASTRAR EQUIPAMENTO</button></div>
 <div class="dashboard"><div class="card metric"><div class="label">Equipamentos</div><div class="value" id="mTotal">0</div></div><div class="card metric"><div class="label">Disponíveis</div><div class="value" id="mAvailable">0</div></div><div class="card metric"><div class="label">Em kits</div><div class="value" id="mInKit">0</div></div><div class="card metric"><div class="label">Kits ativos</div><div class="value" id="mKits">0</div></div></div>
 <div class="card toolbar"><div class="field grow"><label>Produto</label><input id="filterProduct" placeholder="Contém: i73, GNSS, prisma..." oninput="renderEquipmentTable()"></div><div class="field"><label>Disponibilidade</label><select id="filterStatus" onchange="renderEquipmentTable()"><option value="">Todos</option><option value="available">Disponível</option><option value="kit">Em kit</option></select></div><div class="field"><label>Tipo</label><select id="filterType" onchange="renderEquipmentTable()"><option value="">Todos</option><option value="TX/RX">TX/RX</option><option value="RX">RX</option><option value="RX*">RX*</option><option value="none">Sem tipo</option></select></div><div class="field grow"><label>Busca geral</label><input id="filterGeneral" placeholder="Código, local ou série" oninput="renderEquipmentTable()"></div><button class="btn" onclick="clearEquipmentFilters()">LIMPAR</button></div>
 <div class="card table-wrap"><table class="table"><thead><tr><th>Código</th><th>Local</th><th>Produto</th><th>Tipo</th><th>Série</th><th>Variáveis</th><th>Status</th><th>Ações</th></tr></thead><tbody id="equipmentTable"></tbody></table></div>
+</section>
+<section id="produtos" class="page">
+<div class="page-title"><div><h2>Produtos</h2><p>Cadastre e gerencie os produtos usados nos equipamentos.</p></div><button class="btn btn-primary" onclick="openProductModal()">+ CADASTRAR PRODUTO</button></div>
+<div class="card toolbar"><div class="field grow"><label>Buscar produto</label><input id="productPageSearch" placeholder="Nome ou variável do produto" oninput="renderProductPage()"></div><button class="btn" onclick="clearProductPageSearch()">LIMPAR</button></div>
+<div class="card panel"><div class="product-manager" id="productPageManager"></div></div>
 </section>
 <section id="montar" class="page">
 <div class="page-title"><div><h2>Montar Kit</h2><p>Adicione quantos equipamentos forem necessários. Kits são temporários e podem ser alterados depois.</p></div></div>
@@ -152,11 +157,11 @@ button,input,select{font:inherit}button{cursor:pointer}
 </section>
 </main></div>
 
-<div id="equipmentModal" class="modal-backdrop"><div class="modal"><div class="modal-head"><h3 id="equipmentModalTitle">Cadastrar equipamento</h3><button class="close" onclick="closeModal('equipmentModal')">×</button></div><div class="modal-body"><form id="equipmentForm" onsubmit="saveEquipment(event)"><input type="hidden" id="equipmentId"><div class="form-grid"><div class="field"><label>Código</label><div class="product-combobox code-combobox"><input id="eqCodeInput" autocomplete="off" placeholder="Selecione ou digite o código..." onclick="openCodeDropdown()" oninput="filterCodeDropdown()" onfocus="openCodeDropdown()" required><input type="hidden" id="eqCode"><div id="codeDropdown" class="product-dropdown code-dropdown"></div></div><div class="hint">Digite para localizar um código e selecione uma opção da lista.</div><div class="actions" style="margin-top:7px"><button type="button" class="btn btn-small" onclick="openCodeModal()">+ CADASTRAR NOVO CÓDIGO</button><button type="button" class="btn btn-small" onclick="openCodeManager()">GERENCIAR CÓDIGOS</button></div></div><div class="field"><label>Local</label><input id="eqLocation" required></div><div class="field full"><label>Produto</label><div class="product-combobox"><input id="eqProductInput" autocomplete="off" placeholder="Selecione ou digite o produto..." onclick="openProductDropdown()" oninput="filterProductDropdown()" onfocus="openProductDropdown()" required><input type="hidden" id="eqProduct"><div id="productDropdown" class="product-dropdown"></div></div><div class="hint">Digite para localizar um produto e selecione uma opção da lista.</div><div class="actions" style="margin-top:7px"><button type="button" class="btn btn-small" onclick="openProductModal()">+ CADASTRAR NOVO PRODUTO</button><button type="button" class="btn btn-small" onclick="openProductManager()">GERENCIAR PRODUTOS</button></div></div><div class="field" id="typeField" style="display:none"><label>Tipo</label><select id="eqType"><option value="">Selecione</option><option>TX/RX</option><option>RX</option><option>RX*</option></select></div><div class="field" id="hceField" style="display:none"><label>Plataforma HCE</label><div class="checkboxes"><label class="check"><input id="eqLandstar" type="checkbox"> Landstar</label><label class="check"><input id="eqSmartGO" type="checkbox"> SmartGO</label></div><div class="hint">É possível marcar Landstar e SmartGO simultaneamente.</div></div><div class="field" id="seriesField"><label>Série</label><input id="eqSeries" required></div></div></form></div><div class="modal-footer"><button class="btn" onclick="closeModal('equipmentModal')">CANCELAR</button><button class="btn btn-primary" onclick="document.getElementById('equipmentForm').requestSubmit()">SALVAR</button></div></div></div>
+<div id="equipmentModal" class="modal-backdrop"><div class="modal"><div class="modal-head"><h3 id="equipmentModalTitle">Cadastrar equipamento</h3><button class="close" onclick="closeModal('equipmentModal')">×</button></div><div class="modal-body"><form id="equipmentForm" onsubmit="saveEquipment(event)"><input type="hidden" id="equipmentId"><div class="form-grid"><div class="field"><label>Código</label><input id="eqCodeInput" autocomplete="off" inputmode="numeric" maxlength="4" pattern="[0-9]{4}" placeholder="Ex.: 7797" required><input type="hidden" id="eqCode"><div class="hint">Digite os 4 dígitos do código. O EAN-13 é gerado automaticamente em segundo plano.</div></div><div class="field"><label>Local</label><input id="eqLocation" required></div><div class="field full"><label>Produto</label><div class="product-combobox"><input id="eqProductInput" autocomplete="off" placeholder="Selecione ou digite o produto..." onclick="openProductDropdown()" oninput="filterProductDropdown()" onfocus="openProductDropdown()" required><input type="hidden" id="eqProduct"><div id="productDropdown" class="product-dropdown"></div></div><div class="hint">Digite para localizar um produto e selecione uma opção da lista.</div><div class="actions" style="margin-top:7px"><button type="button" class="btn btn-small" onclick="openProductModal()">+ CADASTRAR NOVO PRODUTO</button><button type="button" class="btn btn-small" onclick="openProductManager()">GERENCIAR PRODUTOS</button></div></div><div class="field" id="typeField" style="display:none"><label>Tipo</label><select id="eqType"><option value="">Selecione</option><option>TX/RX</option><option>RX</option><option>RX*</option></select></div><div class="field" id="hceField" style="display:none"><label>Plataforma HCE</label><div class="checkboxes"><label class="check"><input id="eqLandstar" type="checkbox"> Landstar</label><label class="check"><input id="eqSmartGO" type="checkbox"> SmartGO</label></div><div class="hint">É possível marcar Landstar e SmartGO simultaneamente.</div></div><div class="field" id="seriesField"><label>Série</label><input id="eqSeries" required></div></div></form></div><div class="modal-footer"><button class="btn" onclick="closeModal('equipmentModal')">CANCELAR</button><button class="btn btn-primary" onclick="document.getElementById('equipmentForm').requestSubmit()">SALVAR</button></div></div></div>
 
 <div id="duplicateSeriesModal" class="modal-backdrop"><div class="modal"><div class="modal-head"><h3>Duplicar equipamento</h3><button class="close" onclick="cancelDuplicateEquipment()">×</button></div><div class="modal-body"><form id="duplicateSeriesForm" onsubmit="saveDuplicateEquipment(event)"><div class="field"><label>Série do novo equipamento</label><input id="duplicateSeries" autocomplete="off" required placeholder="Informe a série"></div></form></div><div class="modal-footer"><button class="btn" onclick="cancelDuplicateEquipment()">CANCELAR</button><button class="btn btn-primary" onclick="document.getElementById('duplicateSeriesForm').requestSubmit()">SALVAR</button></div></div></div>
 
-<div id="codeModal" class="modal-backdrop"><div class="modal"><div class="modal-head"><h3 id="codeModalTitle">Cadastrar código</h3><button class="close" onclick="closeModal('codeModal')">×</button></div><div class="modal-body"><form id="codeForm" onsubmit="saveCode(event)"><input type="hidden" id="codeId"><div class="form-grid"><div class="field"><label>Código</label><input id="codeValue" required placeholder="Ex.: 7796"></div><div class="field"><label>EAN-13</label><input id="codeEan" required inputmode="numeric" maxlength="13" placeholder="13 dígitos"></div></div><p class="hint">O EAN fica vinculado ao código e será usado automaticamente na etiqueta do equipamento.</p></form></div><div class="modal-footer"><button class="btn" onclick="closeModal('codeModal')">CANCELAR</button><button class="btn btn-primary" onclick="document.getElementById('codeForm').requestSubmit()">SALVAR CÓDIGO</button></div></div></div>
+<div id="codeModal" class="modal-backdrop"><div class="modal"><div class="modal-head"><h3 id="codeModalTitle">Cadastrar código</h3><button class="close" onclick="closeModal('codeModal')">×</button></div><div class="modal-body"><form id="codeForm" onsubmit="saveCode(event)"><input type="hidden" id="codeId"><div class="form-grid"><div class="field"><label>Código</label><input id="codeValue" required placeholder="Ex.: 7796"></div><div class="field"><label>EAN-13</label><input id="codeEanPreview" disabled placeholder="Gerado automaticamente"></div></div><p class="hint">O EAN-13 é gerado automaticamente a partir do código usando o prefixo interno 12345678.</p></form></div><div class="modal-footer"><button class="btn" onclick="closeModal('codeModal')">CANCELAR</button><button class="btn btn-primary" onclick="document.getElementById('codeForm').requestSubmit()">SALVAR CÓDIGO</button></div></div></div>
 
 <div id="codeManagerModal" class="modal-backdrop"><div class="modal wide"><div class="modal-head"><h3>Gerenciar códigos</h3><button class="close" onclick="closeModal('codeManagerModal')">×</button></div><div class="modal-body"><div id="codeManager"></div></div><div class="modal-footer"><button class="btn" onclick="closeModal('codeManagerModal')">FECHAR</button></div></div></div>
 
@@ -1443,7 +1448,9 @@ module.exports = QRCode;
 </script>
 <script>
 const CONFIG={STORAGE_KEY:'controle_kits_v2'};
-let state={products:[],codes:[],equipments:[],kits:[],nextKitNumber:1};
+const CURRENT_DATA_VERSION=1;
+function emptyState(){return {dataVersion:CURRENT_DATA_VERSION,products:[],codes:[],equipments:[],kits:[],nextKitNumber:1}}
+let state=emptyState();
 let selectedEquipment=[];
 let editingKitId=null;
 let editingKitEquipment=[];
@@ -1460,20 +1467,87 @@ function hceText(e){const h=e?.hce||{};if(h.landstar&&h.smartgo)return 'LS/SMG';
 function equipmentMetricHtml(e){const p=getProduct(e?.productId);const out=[];if(p?.variables.includes('GNSS')&&e?.type)out.push(`<span class="badge badge-blue">${esc(e.type)}</span>`);if(p?.variables.includes('HCE')){if(e?.hce?.landstar)out.push('<span class="badge badge-blue">Landstar</span>');if(e?.hce?.smartgo)out.push('<span class="badge badge-blue">SmartGO</span>')}return out.length?out.join(' '):'-'}
 function getProduct(id){return state.products.find(p=>p.id===id)}
 function getCode(id){return state.codes.find(c=>c.id===id)}
+function ensureCodeRecord(code){
+ const clean=String(code??'').replace(/\D/g,'');
+ if(!/^\d{4}$/.test(clean))return null;
+ let c=state.codes.find(x=>String(x.code)===clean);
+ const ean=generateEanFromCode(clean);
+ if(c){c.code=clean;c.ean=ean;return c}
+ c={id:uid('cod'),code:clean,ean};state.codes.push(c);return c;
+}
 function getEquipment(id){return state.equipments.find(e=>e.id===id)}
 function isInKit(id){return state.kits.some(k=>k.equipmentIds.includes(id))}
 function save(){localStorage.setItem(CONFIG.STORAGE_KEY,JSON.stringify(state));updateDashboard();updateCharts()}
 function toast(msg){$('toast').textContent=msg;$('toast').classList.add('show');setTimeout(()=>$('toast').classList.remove('show'),2400)}
-function openModal(id){closeProductDropdown();closeCodeDropdown();$(id).classList.add('open')}function closeModal(id){$(id).classList.remove('open');if(id==='equipmentModal'){closeProductDropdown();closeCodeDropdown()}}
+function openModal(id){closeProductDropdown();$(id).classList.add('open')}function closeModal(id){$(id).classList.remove('open');if(id==='equipmentModal')closeProductDropdown()}
 document.addEventListener('mousedown',ev=>{
     const productCombo=$('eqProductInput')?.closest('.product-combobox');
-    const codeCombo=$('eqCodeInput')?.closest('.code-combobox');
     if(productCombo&&!productCombo.contains(ev.target))closeProductDropdown();
-    if(codeCombo&&!codeCombo.contains(ev.target))closeCodeDropdown();
 });
-document.addEventListener('keydown',ev=>{if(ev.key==='Escape'){closeProductDropdown();closeCodeDropdown()}});
+document.addEventListener('keydown',ev=>{if(ev.key==='Escape')closeProductDropdown()});
 
+function migrateData(data){
+    if(!data||typeof data!=='object'||Array.isArray(data))throw new Error('Estrutura de dados inválida');
+    let version=Number.isInteger(data.dataVersion)?data.dataVersion:0;
+    if(version>CURRENT_DATA_VERSION)throw new Error('Backup criado por uma versão mais nova do sistema');
+    while(version<CURRENT_DATA_VERSION){
+        if(version===0){
+            // Formato legado B1.0–B16.1 -> esquema versionado atual.
+            if(!Array.isArray(data.products)||!Array.isArray(data.equipments)||!Array.isArray(data.kits))throw new Error('Backup legado inválido');
+            if(!Array.isArray(data.codes))data.codes=[];
+            data.dataVersion=1;
+            version=1;
+            continue;
+        }
+        throw new Error('Não existe migração para esta versão de dados');
+    }
+    return data;
+}
+function validateState(data){
+    if(!data||typeof data!=='object'||Array.isArray(data))throw new Error('Estrutura inválida');
+    for(const key of ['products','codes','equipments','kits'])if(!Array.isArray(data[key]))throw new Error('Lista '+key+' inválida');
+    const productIds=new Set();
+    for(const p of data.products){
+        if(!p||typeof p!=='object'||!p.id||!String(p.name||'').trim())throw new Error('Produto inválido');
+        if(productIds.has(p.id))throw new Error('ID de produto duplicado');
+        productIds.add(p.id);
+    }
+    const equipmentIds=new Set(),serials=new Set();
+    for(const e of data.equipments){
+        if(!e||typeof e!=='object'||!e.id)throw new Error('Equipamento inválido');
+        if(equipmentIds.has(e.id))throw new Error('ID de equipamento duplicado');
+        equipmentIds.add(e.id);
+        if(e.productId&&!productIds.has(e.productId))throw new Error('Equipamento vinculado a produto inexistente');
+        if(e.series&&e.series!=='Equipamento não seriado'){
+            const serial=String(e.series).trim();
+            if(serials.has(serial))throw new Error('Série duplicada: '+serial);
+            serials.add(serial);
+        }
+    }
+    const kitIds=new Set();
+    for(const k of data.kits){
+        if(!k||typeof k!=='object'||!k.id||!Array.isArray(k.equipmentIds))throw new Error('Kit inválido');
+        if(kitIds.has(k.id))throw new Error('ID de kit duplicado');
+        kitIds.add(k.id);
+        const seen=new Set();
+        for(const id of k.equipmentIds){
+            if(seen.has(id))throw new Error('Equipamento repetido no kit');
+            if(!equipmentIds.has(id))throw new Error('Kit referencia equipamento inexistente');
+            seen.add(id);
+        }
+    }
+    return true;
+}
+function prepareState(raw){
+    const candidate=structuredClone(raw);
+    state=migrateData(candidate);
+    normalize();
+    state.dataVersion=CURRENT_DATA_VERSION;
+    validateState(state);
+    return state;
+}
 function normalize(){
+    state.dataVersion=Number.isInteger(state.dataVersion)?state.dataVersion:CURRENT_DATA_VERSION;
     state.products=Array.isArray(state.products)?state.products:[];
     state.codes=Array.isArray(state.codes)?state.codes:[];
     state.equipments=Array.isArray(state.equipments)?state.equipments:[];
@@ -1497,8 +1571,22 @@ function normalize(){
     state.kits.forEach(k=>{
         if(!k.id)k.id=uid('kit');if(!k.name)k.name=k.id;if(!k.createdAt)k.createdAt=k.updatedAt||now();if(!k.updatedAt)k.updatedAt=k.createdAt;if(!Array.isArray(k.equipmentIds))k.equipmentIds=[];k.ntrip=calcNtrip(k.equipmentIds)
     });
+
+ state.codes.forEach(c=>{const generated=generateEanFromCode(c.code);if(generated)c.ean=generated});
 }
-function load(){try{const raw=localStorage.getItem(CONFIG.STORAGE_KEY)||localStorage.getItem('controle_kits_v1');if(raw){state=JSON.parse(raw);normalize();save()}}catch(e){state={products:[],codes:[],equipments:[],kits:[],nextKitNumber:1}}}
+function load(){
+    const raw=localStorage.getItem(CONFIG.STORAGE_KEY)||localStorage.getItem('controle_kits_v1');
+    if(!raw){state=emptyState();return}
+    try{
+        const parsed=JSON.parse(raw);
+        prepareState(parsed);
+        save();
+    }catch(e){
+        console.error('Falha ao carregar dados:',e);
+        state=emptyState();
+        toast('Os dados salvos não puderam ser carregados. O armazenamento original não foi sobrescrito.');
+    }
+}
 
 function calcNtrip(ids){
     const serial=ids.map(getEquipment).filter(Boolean).filter(e=>{const p=getProduct(e.productId);return p?.variables.includes('GNSS')||p?.variables.includes('Ecobatímetro')});
@@ -1510,8 +1598,8 @@ function updateDashboard(){$('mTotal').textContent=state.equipments.length;$('mA
 function renderCodeSelect(selected=''){
     const c=getCode(selected);$('eqCode').value=selected||'';$('eqCodeInput').value=c?.code||'';filterCodeDropdown();
 }
-function openCodeDropdown(){filterCodeDropdown();$('codeDropdown').classList.add('open')}
-function closeCodeDropdown(){$('codeDropdown').classList.remove('open')}
+function openCodeDropdown(){const d=$('codeDropdown');if(!d)return;filterCodeDropdown();d.classList.add('open')}
+function closeCodeDropdown(){const d=$('codeDropdown');if(d)d.classList.remove('open')}
 function filterCodeDropdown(){
     const q=($('eqCodeInput').value||'').toLowerCase().trim();
     const codes=state.codes.slice().sort((a,b)=>String(a.code).localeCompare(String(b.code),'pt-BR',{numeric:true})).filter(c=>!q||String(c.code).toLowerCase().includes(q));
@@ -1532,9 +1620,9 @@ function filterProductDropdown(){
 function selectProduct(id){const p=getProduct(id);if(!p)return;$('eqProduct').value=id;$('eqProductInput').value=p.name;$('productDropdown').classList.remove('open');updateProductFields()}
 function openEquipmentModal(id=''){
     $('equipmentId').value=id;
-    if(id){const e=getEquipment(id);$('equipmentModalTitle').textContent='Editar equipamento';renderCodeSelect(e.codeId);$('eqLocation').value=e.location;$('eqType').value=e.type||'';$('eqSeries').value=e.series||'';$('eqLandstar').checked=!!e.hce?.landstar;$('eqSmartGO').checked=!!e.hce?.smartgo;renderProductSelect(e.productId)}
+    if(id){const e=getEquipment(id);$('equipmentModalTitle').textContent='Editar equipamento';$('eqCode').value=e.codeId||'';$('eqCodeInput').value=e.code||'';$('eqLocation').value=e.location;$('eqType').value=e.type||'';$('eqSeries').value=e.series||'';$('eqLandstar').checked=!!e.hce?.landstar;$('eqSmartGO').checked=!!e.hce?.smartgo;renderProductSelect(e.productId)}
     else{$('equipmentModalTitle').textContent='Cadastrar equipamento';$('equipmentForm').reset();$('eqCode').value='';$('eqCodeInput').value='';$('eqProduct').value='';$('eqProductInput').value='';$('eqLandstar').checked=false;$('eqSmartGO').checked=false}
-    updateProductFields();filterProductDropdown();filterCodeDropdown();openModal('equipmentModal')
+    updateProductFields();filterProductDropdown();openModal('equipmentModal')
 }
 function updateProductFields(){
     const p=getProduct($('eqProduct').value);const accessory=p?.variables.includes('Acessório');const gnss=p?.variables.includes('GNSS');const hce=p?.variables.includes('HCE');
@@ -1545,7 +1633,7 @@ function updateProductFields(){
     if(accessory){$('eqSeries').value='Equipamento não seriado';$('eqType').value='';$('eqLandstar').checked=false;$('eqSmartGO').checked=false}
 }
 function saveEquipment(ev){
-    ev.preventDefault();const id=$('equipmentId').value;const c=getCode($('eqCode').value);if(!c){toast('Selecione um código da lista.');$('eqCodeInput').focus();return}const p=getProduct($('eqProduct').value);if(!p){toast('Selecione um produto da lista.');$('eqProductInput').focus();return}
+    ev.preventDefault();const id=$('equipmentId').value;const rawCode=$('eqCodeInput').value.trim().replace(/\D/g,'');if(!/^\d{4}$/.test(rawCode)){toast('Informe um código com exatamente 4 dígitos.');$('eqCodeInput').focus();return}const c=ensureCodeRecord(rawCode);$('eqCode').value=c.id;const p=getProduct($('eqProduct').value);if(!p){toast('Selecione um produto da lista.');$('eqProductInput').focus();return}
     const accessory=p.variables.includes('Acessório');const gnss=p.variables.includes('GNSS');const hce=p.variables.includes('HCE');let series=accessory?'Equipamento não seriado':$('eqSeries').value.trim();let type=gnss?$('eqType').value:'';
     const hceData=hce&&!accessory?{landstar:$('eqLandstar').checked,smartgo:$('eqSmartGO').checked}:{landstar:false,smartgo:false};
     if(!accessory&&!series){toast('Informe a série.');return}if(gnss&&!type){toast('Selecione o tipo do GNSS.');return}
@@ -1590,26 +1678,42 @@ function renderEquipmentTable(){
 }
 function clearEquipmentFilters(){$('filterProduct').value='';$('filterStatus').value='';$('filterType').value='';$('filterGeneral').value='';renderEquipmentTable()}
 
-function openCodeModal(id=''){$('codeForm').reset();$('codeId').value=id;if(id){const c=getCode(id);$('codeModalTitle').textContent='Editar código';$('codeValue').value=c.code;$('codeEan').value=c.ean||''}else $('codeModalTitle').textContent='Cadastrar código';openModal('codeModal')}
+function openCodeModal(id=''){$('codeForm').reset();$('codeId').value=id;if(id){const c=getCode(id);$('codeModalTitle').textContent='Editar código';$('codeValue').value=c.code}else $('codeModalTitle').textContent='Cadastrar código';updateCodeEanPreview();openModal('codeModal')}
+
 function validEan13(value){
     if(!/^\d{13}$/.test(value))return false;
     const d=value.split('').map(Number);let sum=0;
     for(let i=0;i<12;i++)sum+=d[i]*(i%2===0?1:3);
     return (10-(sum%10))%10===d[12];
 }
+function generateEanFromCode(code){
+ const clean=String(code??'').replace(/\D/g,'');
+ if(!/^\d{4}$/.test(clean))return '';
+ const base='12345678'+clean;
+ let sum=0;
+ for(let i=0;i<12;i++)sum+=Number(base[i])*(i%2===0?1:3);
+ const check=(10-(sum%10))%10;
+ return base+check;
+}
+function updateCodeEanPreview(){
+ const preview=$('codeEanPreview');if(!preview)return;
+ preview.value=generateEanFromCode($('codeValue').value)||'';
+}
 function saveCode(ev){
-    ev.preventDefault();const id=$('codeId').value;const code=$('codeValue').value.trim();const ean=$('codeEan').value.replace(/\D/g,'');
-    if(!code){toast('Informe o código.');return}
-    if(!/^\d{13}$/.test(ean)){toast('O EAN-13 precisa ter exatamente 13 dígitos.');return}
-    if(!validEan13(ean)){toast('O dígito verificador do EAN-13 é inválido.');return}
-    if(state.codes.some(c=>c.id!==id&&String(c.code).toLowerCase()===code.toLowerCase())){toast('Já existe um cadastro com esse código.');return}
-    if(state.codes.some(c=>c.id!==id&&c.ean===ean)){toast('Esse EAN-13 já está vinculado a outro código.');return}
-    let codeId=id;
-    if(id){const c=getCode(id);c.code=code;c.ean=ean;state.equipments.filter(e=>e.codeId===id).forEach(e=>e.code=code)}
-    else{codeId=uid('cod');state.codes.push({id:codeId,code,ean})}
-    save();closeModal('codeModal');renderAll();renderCodeManager();
-    if($('equipmentModal').classList.contains('open')){renderCodeSelect(codeId);$('eqCodeInput').focus();openCodeDropdown()}
-    toast(id?'Código atualizado.':'Código cadastrado.');
+ ev.preventDefault();
+ const id=$('codeId').value,code=$('codeValue').value.trim().replace(/\D/g,'');
+ if(!/^\d{4}$/.test(code)){toast('Informe um código com exatamente 4 dígitos.');return}
+ const ean=generateEanFromCode(code);
+ if(!ean||!validEan13(ean)){toast('Não foi possível gerar um EAN-13 válido.');return}
+ if(state.codes.some(c=>c.code===code&&c.id!==id)){toast('Este código já está cadastrado.');return}
+ if(state.codes.some(c=>c.ean===ean&&c.id!==id)){toast('O EAN-13 gerado já pertence a outro código.');return}
+ if(id){
+   const c=getCode(id);if(!c)return;c.code=code;c.ean=ean;
+   state.equipments.filter(x=>x.codeId===c.id).forEach(x=>x.code=code);
+ }else{
+   const c={id:uid('code'),code,ean};state.codes.push(c);setCodeSelection(c);
+ }
+ closeModal('codeModal');save();renderAll();toast('Código salvo. EAN-13 gerado automaticamente.');
 }
 function openCodeManager(){renderCodeManager();openModal('codeManagerModal')}
 function renderCodeManager(){$('codeManager').innerHTML=state.codes.length?state.codes.slice().sort((a,b)=>String(a.code).localeCompare(String(b.code),'pt-BR',{numeric:true})).map(c=>`<div class="product-row"><div><strong>${esc(c.code)}</strong><div class="hint">EAN-13: ${esc(c.ean||'Não informado')}</div></div><div class="table-actions"><button class="btn btn-small" onclick="openCodeModal('${c.id}')">EDITAR</button><button class="btn btn-small btn-danger" onclick="deleteCode('${c.id}')">EXCLUIR</button></div></div>`).join(''):'<div class="empty">Nenhum código cadastrado.</div>'}
@@ -1619,7 +1723,14 @@ function openProductModal(id=''){$('productForm').reset();$('productId').value=i
 function saveProduct(ev){ev.preventDefault();const id=$('productId').value;const name=$('productName').value.trim();const variables=[];if($('varGnss').checked)variables.push('GNSS');if($('varHce').checked)variables.push('HCE');if($('varEcho').checked)variables.push('Ecobatímetro');if($('varAccessory').checked)variables.push('Acessório');if(!name){toast('Informe o nome do produto.');return}const duplicate=state.products.find(p=>p.id!==id&&p.name.toLowerCase()===name.toLowerCase());if(duplicate){toast('Já existe um produto com esse nome.');return}let productId=id;if(id){const p=getProduct(id);p.name=name;p.variables=variables;state.equipments.filter(e=>e.productId===id).forEach(e=>{if(variables.includes('Acessório')){e.series='Equipamento não seriado';e.type='';e.hce={landstar:false,smartgo:false}}else{if(!variables.includes('GNSS'))e.type='';if(!variables.includes('HCE'))e.hce={landstar:false,smartgo:false};else if(!e.hce)e.hce={landstar:false,smartgo:false}}})}else{productId=uid('prd');state.products.push({id:productId,name,variables})}save();closeModal('productModal');renderAll();renderProductManager();if($('equipmentModal').classList.contains('open')){renderProductSelect(productId);updateProductFields();$('eqProductInput').focus();openProductDropdown()}toast(id?'Produto atualizado.':'Produto cadastrado.');
 }
 function openProductManager(){renderProductManager();openModal('productManagerModal')}
-function renderProductManager(){$('productManager').innerHTML=state.products.length?state.products.slice().sort((a,b)=>a.name.localeCompare(b.name,'pt-BR')).map(p=>`<div class="product-row"><div><strong>${esc(p.name)}</strong><div class="product-vars">${p.variables.map(v=>`<span class="badge badge-blue">${esc(v)}</span>`).join('')||'<span class="badge badge-gray">Sem variável</span>'}</div></div><div class="table-actions"><button class="btn btn-small" onclick="openProductModal('${p.id}')">EDITAR</button><button class="btn btn-small btn-danger" onclick="deleteProduct('${p.id}')">EXCLUIR</button></div></div>`).join(''):'<div class="empty">Nenhum produto cadastrado.</div>'}
+function renderProductPage(){
+    const el=$('productPageManager');if(!el)return;
+    const q=($('productPageSearch')?.value||'').toLowerCase().trim();
+    const list=state.products.slice().sort((a,b)=>a.name.localeCompare(b.name,'pt-BR')).filter(p=>!q||[p.name,...(p.variables||[])].join(' ').toLowerCase().includes(q));
+    el.innerHTML=list.length?list.map(p=>`<div class="product-row"><div><strong>${esc(p.name)}</strong><div class="product-vars">${p.variables.map(v=>`<span class="badge badge-blue">${esc(v)}</span>`).join('')||'<span class="badge badge-gray">Sem variável</span>'}</div></div><div class="table-actions"><button class="btn btn-small" onclick="openProductModal('${p.id}')">EDITAR</button><button class="btn btn-small btn-danger" onclick="deleteProduct('${p.id}')">EXCLUIR</button></div></div>`).join(''):'<div class="empty">Nenhum produto encontrado.</div>';
+}
+function clearProductPageSearch(){const el=$('productPageSearch');if(el)el.value='';renderProductPage()}
+function renderProductManager(){renderProductPage();$('productManager').innerHTML=state.products.length?state.products.slice().sort((a,b)=>a.name.localeCompare(b.name,'pt-BR')).map(p=>`<div class="product-row"><div><strong>${esc(p.name)}</strong><div class="product-vars">${p.variables.map(v=>`<span class="badge badge-blue">${esc(v)}</span>`).join('')||'<span class="badge badge-gray">Sem variável</span>'}</div></div><div class="table-actions"><button class="btn btn-small" onclick="openProductModal('${p.id}')">EDITAR</button><button class="btn btn-small btn-danger" onclick="deleteProduct('${p.id}')">EXCLUIR</button></div></div>`).join(''):'<div class="empty">Nenhum produto cadastrado.</div>'}
 function deleteProduct(id){if(state.equipments.some(e=>e.productId===id)){toast('Não é possível excluir um produto que possui equipamentos cadastrados.');return}confirm('Excluir este produto?',()=>{state.products=state.products.filter(p=>p.id!==id);save();renderAll();renderProductManager();toast('Produto excluído.')})}
 
 function renderBuilder(){
@@ -1728,7 +1839,7 @@ function pdfDoc(stream){
 function buildKitLabelPdf(k,serialized,e){
  const mm=72/25.4,H=30*mm,L=50*mm,RX=53*mm,R=50*mm,M=3*mm,lx=M,lw=L-2*M,rx=RX+M,rw=R-2*M;let s='',info=`${e.code||''} ${e.location||''} S/N: ${e.series||''}`;
  s+=pdfTextCommand(k.name,lx,H-M-10,10,lw,true,'center');let qs=19*mm;s+=pdfQr(e.series,(L-qs)/2,M+5.5,qs);let fs=7.2;while(pdfApproxWidth(info,fs,true)>lw&&fs>5.3)fs-=.2;s+=pdfTextCommand(info,lx,M,fs,lw,true,'center');
- s+=pdfTextCommand(k.name,rx,H-M-10,10,rw,true,'center');let ean=getCode(e.codeId)?.ean||'',bh=11.5*mm,by=M+13.5;s+=pdfEan13Command(ean,rx,by,rw,bh);s+=pdfTextCommand(ean,rx,by-5.6,5.8,rw,true,'center');fs=7.2;while(pdfApproxWidth(info,fs,true)>rw&&fs>5.3)fs-=.2;s+=pdfTextCommand(info,rx,M,fs,rw,true,'center');return pdfDoc(s)
+ s+=pdfTextCommand(k.name,rx,H-M-10,10,rw,true,'center');let ean=generateEanFromCode(e.code),bh=11.5*mm,by=M+13.5;s+=pdfEan13Command(ean,rx,by,rw,bh);s+=pdfTextCommand(ean,rx,by-5.6,5.8,rw,true,'center');fs=7.2;while(pdfApproxWidth(info,fs,true)>rw&&fs>5.3)fs-=.2;s+=pdfTextCommand(info,rx,M,fs,rw,true,'center');return pdfDoc(s)
 }
 function isAccessoryEquipment(e){
  return !!getProduct(e.productId)?.variables?.includes('Acessório');
@@ -1750,7 +1861,7 @@ function buildStandaloneEquipmentLabelPdf(e){
 }
 function buildAccessoryEanLabelPdf(e){
  const mm=72/25.4,H=30*mm,L=50*mm,RX=53*mm,R=50*mm,M=3*mm,lx=M,lw=L-2*M,rx=RX+M,rw=R-2*M;
- const title='CPE - SP',ean=getCode(e.codeId)?.ean||'',product=getProduct(e.productId)?.name||'Produto';
+ const title='CPE - SP',ean=generateEanFromCode(e.code),product=getProduct(e.productId)?.name||'Produto';
  const info=[e.code,product,e.location,'N/S'].filter(Boolean).join(' ');
  let s='',bh=11.5*mm,by=M+13.5;
  [ [lx,lw], [rx,rw] ].forEach(([x,w])=>{
@@ -1765,8 +1876,8 @@ function buildAccessoryEanLabelPdf(e){
 function printStandaloneEquipmentLabel(id){
  const e=getEquipment(id);
  if(!e){toast('Equipamento não encontrado.');return}
- const codeRecord=getCode(e.codeId);
- if(!codeRecord?.ean||!validEan13(codeRecord.ean)){toast('O código '+(e.code||'')+' não possui um EAN-13 válido cadastrado.');return}
+ const ean=generateEanFromCode(e.code);
+ if(!ean||!validEan13(ean)){toast('Não foi possível gerar um EAN-13 válido para o código '+(e.code||'')+'.');return}
  try{
    if(isAccessoryEquipment(e))openPdfBytes(buildAccessoryEanLabelPdf(e),`${e.code} - EAN EAN`);
    else{
@@ -1819,9 +1930,28 @@ function updateCharts(){
     const n=state.kits.filter(k=>k.ntrip).length,c=state.kits.length-n,p2=state.kits.length?n/state.kits.length*100:0;$('kitPie').style.background=`conic-gradient(var(--accent) 0 ${p2}%, #d8d8d8 ${p2}% 100%)`;$('kitLegend').innerHTML=`<div class="legend-item"><span class="dot accent"></span>NTrip: <strong>${n}</strong></div><div class="legend-item"><span class="dot gray"></span>Completos: <strong>${c}</strong></div><div class="legend-item"><span class="dot accent"></span>Total: <strong>${state.kits.length}</strong></div>`;
 }
 
-function exportData(){const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='backup-controle-kits-'+new Date().toISOString().slice(0,10)+'.json';a.click();URL.revokeObjectURL(a.href);toast('Backup exportado.')}
-function importData(ev){const file=ev.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=()=>{try{const imported=JSON.parse(reader.result);if(!imported||!Array.isArray(imported.equipments)||!Array.isArray(imported.kits)||!Array.isArray(imported.products))throw new Error();if(!Array.isArray(imported.codes))imported.codes=[];state=imported;normalize();const serials=new Set();for(const e of state.equipments){if(e.series!=='Equipamento não seriado'){if(serials.has(e.series))throw new Error('Série duplicada');serials.add(e.series)}}for(const k of state.kits){const ids=new Set();for(const id of k.equipmentIds){if(ids.has(id))throw new Error('Equipamento repetido no kit');ids.add(id)}k.ntrip=calcNtrip(k.equipmentIds)}save();renderAll();toast('Backup importado.')}catch(e){toast('Arquivo inválido ou incompatível.')}ev.target.value=''};reader.readAsText(file)}
-function clearAllData(){confirm('Isso apagará códigos, produtos, equipamentos e kits deste navegador. Esta ação não pode ser desfeita sem um backup.',()=>{localStorage.removeItem(CONFIG.STORAGE_KEY);state={products:[],codes:[],equipments:[],kits:[],nextKitNumber:1};selectedEquipment=[];save();renderAll();toast('Todos os dados foram apagados.')})}
+function exportData(){state.dataVersion=CURRENT_DATA_VERSION;const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='backup-controle-kits-'+new Date().toISOString().slice(0,10)+'.json';a.click();URL.revokeObjectURL(a.href);toast('Backup exportado.')}
+function importData(ev){
+    const file=ev.target.files[0];if(!file)return;
+    const reader=new FileReader();
+    reader.onload=()=>{
+        const previous=structuredClone(state);
+        try{
+            const imported=JSON.parse(reader.result);
+            // Migra e valida completamente antes de persistir qualquer coisa.
+            prepareState(imported);
+            save();renderAll();
+            toast('Backup importado e validado. Dados atualizados com segurança.');
+        }catch(e){
+            state=previous;
+            console.error('Importação recusada:',e);
+            toast('Backup recusado: dados atuais foram mantidos intactos.');
+        }
+        ev.target.value='';
+    };
+    reader.readAsText(file);
+}
+function clearAllData(){confirm('Isso apagará códigos, produtos, equipamentos e kits deste navegador. Esta ação não pode ser desfeita sem um backup.',()=>{localStorage.removeItem(CONFIG.STORAGE_KEY);state=emptyState();selectedEquipment=[];save();renderAll();toast('Todos os dados foram apagados.')})}
 function confirm(text,cb){$('confirmText').textContent=text;confirmCallback=cb;$('confirmAction').onclick=()=>{closeModal('confirmModal');const f=confirmCallback;confirmCallback=null;if(f)f()};openModal('confirmModal')}
 
 function renderBuilderProductFilter(){$('builderProduct').innerHTML='<option value="">Todos</option>'+state.products.slice().sort((a,b)=>a.name.localeCompare(b.name,'pt-BR')).map(p=>`<option value="${p.id}">${esc(p.name)}</option>`).join('')}
@@ -1834,14 +1964,16 @@ function applyResponsiveTableLabels(){
    });
  });
 }
-function renderAll(){updateDashboard();renderEquipmentTable();renderBuilderProductFilter();renderBuilder();renderKits();updateCharts();renderProductManager();renderCodeManager()}
+function renderAll(){updateDashboard();renderEquipmentTable();renderProductPage();renderBuilderProductFilter();renderBuilder();renderKits();updateCharts();renderProductManager();renderCodeManager()}
 
-document.querySelectorAll('.nav button').forEach(btn=>btn.addEventListener('click',()=>{document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('active'));document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));btn.classList.add('active');$(btn.dataset.page).classList.add('active');if(btn.dataset.page==='dados')updateCharts()}));
+document.querySelectorAll('.nav button').forEach(btn=>btn.addEventListener('click',()=>{document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('active'));document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));btn.classList.add('active');$(btn.dataset.page).classList.add('active');if(btn.dataset.page==='dados')updateCharts();if(btn.dataset.page==='produtos')renderProductPage()}));
 load();renderAll();
 
 const responsiveTableObserver=new MutationObserver(()=>applyResponsiveTableLabels());
 document.querySelectorAll('.table-wrap').forEach(el=>responsiveTableObserver.observe(el,{childList:true,subtree:true}));
 applyResponsiveTableLabels();
+
+$('codeValue')?.addEventListener('input',updateCodeEanPreview);
 </script>
 </body>
 </html>
