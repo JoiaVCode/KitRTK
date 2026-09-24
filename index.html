@@ -154,6 +154,8 @@ button,input,select{font:inherit}button{cursor:pointer}
 
 <div id="equipmentModal" class="modal-backdrop"><div class="modal"><div class="modal-head"><h3 id="equipmentModalTitle">Cadastrar equipamento</h3><button class="close" onclick="closeModal('equipmentModal')">×</button></div><div class="modal-body"><form id="equipmentForm" onsubmit="saveEquipment(event)"><input type="hidden" id="equipmentId"><div class="form-grid"><div class="field"><label>Código</label><div class="product-combobox code-combobox"><input id="eqCodeInput" autocomplete="off" placeholder="Selecione ou digite o código..." onclick="openCodeDropdown()" oninput="filterCodeDropdown()" onfocus="openCodeDropdown()" required><input type="hidden" id="eqCode"><div id="codeDropdown" class="product-dropdown code-dropdown"></div></div><div class="hint">Digite para localizar um código e selecione uma opção da lista.</div><div class="actions" style="margin-top:7px"><button type="button" class="btn btn-small" onclick="openCodeModal()">+ CADASTRAR NOVO CÓDIGO</button><button type="button" class="btn btn-small" onclick="openCodeManager()">GERENCIAR CÓDIGOS</button></div></div><div class="field"><label>Local</label><input id="eqLocation" required></div><div class="field full"><label>Produto</label><div class="product-combobox"><input id="eqProductInput" autocomplete="off" placeholder="Selecione ou digite o produto..." onclick="openProductDropdown()" oninput="filterProductDropdown()" onfocus="openProductDropdown()" required><input type="hidden" id="eqProduct"><div id="productDropdown" class="product-dropdown"></div></div><div class="hint">Digite para localizar um produto e selecione uma opção da lista.</div><div class="actions" style="margin-top:7px"><button type="button" class="btn btn-small" onclick="openProductModal()">+ CADASTRAR NOVO PRODUTO</button><button type="button" class="btn btn-small" onclick="openProductManager()">GERENCIAR PRODUTOS</button></div></div><div class="field" id="typeField" style="display:none"><label>Tipo</label><select id="eqType"><option value="">Selecione</option><option>TX/RX</option><option>RX</option><option>RX*</option></select></div><div class="field" id="hceField" style="display:none"><label>Plataforma HCE</label><div class="checkboxes"><label class="check"><input id="eqLandstar" type="checkbox"> Landstar</label><label class="check"><input id="eqSmartGO" type="checkbox"> SmartGO</label></div><div class="hint">É possível marcar Landstar e SmartGO simultaneamente.</div></div><div class="field" id="seriesField"><label>Série</label><input id="eqSeries" required></div></div></form></div><div class="modal-footer"><button class="btn" onclick="closeModal('equipmentModal')">CANCELAR</button><button class="btn btn-primary" onclick="document.getElementById('equipmentForm').requestSubmit()">SALVAR</button></div></div></div>
 
+<div id="duplicateSeriesModal" class="modal-backdrop"><div class="modal"><div class="modal-head"><h3>Duplicar equipamento</h3><button class="close" onclick="cancelDuplicateEquipment()">×</button></div><div class="modal-body"><form id="duplicateSeriesForm" onsubmit="saveDuplicateEquipment(event)"><div class="field"><label>Série do novo equipamento</label><input id="duplicateSeries" autocomplete="off" required placeholder="Informe a série"></div></form></div><div class="modal-footer"><button class="btn" onclick="cancelDuplicateEquipment()">CANCELAR</button><button class="btn btn-primary" onclick="document.getElementById('duplicateSeriesForm').requestSubmit()">SALVAR</button></div></div></div>
+
 <div id="codeModal" class="modal-backdrop"><div class="modal"><div class="modal-head"><h3 id="codeModalTitle">Cadastrar código</h3><button class="close" onclick="closeModal('codeModal')">×</button></div><div class="modal-body"><form id="codeForm" onsubmit="saveCode(event)"><input type="hidden" id="codeId"><div class="form-grid"><div class="field"><label>Código</label><input id="codeValue" required placeholder="Ex.: 7796"></div><div class="field"><label>EAN-13</label><input id="codeEan" required inputmode="numeric" maxlength="13" placeholder="13 dígitos"></div></div><p class="hint">O EAN fica vinculado ao código e será usado automaticamente na etiqueta do equipamento.</p></form></div><div class="modal-footer"><button class="btn" onclick="closeModal('codeModal')">CANCELAR</button><button class="btn btn-primary" onclick="document.getElementById('codeForm').requestSubmit()">SALVAR CÓDIGO</button></div></div></div>
 
 <div id="codeManagerModal" class="modal-backdrop"><div class="modal wide"><div class="modal-head"><h3>Gerenciar códigos</h3><button class="close" onclick="closeModal('codeManagerModal')">×</button></div><div class="modal-body"><div id="codeManager"></div></div><div class="modal-footer"><button class="btn" onclick="closeModal('codeManagerModal')">FECHAR</button></div></div></div>
@@ -1488,7 +1490,7 @@ function normalize(){
         const linkedCode=getCode(e.codeId);e.code=linkedCode?.code||e.code||'';e.location=e.location||'';e.series=e.series||'';e.type=e.type||'';
         e.hce=e.hce&&typeof e.hce==='object'?e.hce:{landstar:false,smartgo:false};
         e.hce.landstar=!!e.hce.landstar;e.hce.smartgo=!!e.hce.smartgo;
-        const p=getProduct(e.productId);if(p?.variables.includes('Acessório')){e.series='Equipamento não seriado';e.type='';e.hce={landstar:false,smartgo:false}}
+        const p=getProduct(e.productId);if(p?.variables.includes('Acessório')){e.series='Equipamento não seriado';e.type='';e.hce={landstar:false,smartgo:false};e.balance=Math.max(1,Number(e.balance)||1)}else delete e.balance
         if(p?.variables.includes('GNSS')&&!e.type)e.type='RX';
         if(!p?.variables.includes('HCE'))e.hce={landstar:false,smartgo:false};
     });
@@ -1549,15 +1551,42 @@ function saveEquipment(ev){
     if(!accessory&&!series){toast('Informe a série.');return}if(gnss&&!type){toast('Selecione o tipo do GNSS.');return}
     if(hce&&!accessory&&!hceData.landstar&&!hceData.smartgo){toast('Selecione Landstar, SmartGO ou os dois.');return}
     const duplicate=state.equipments.find(e=>e.id!==id&&e.series===series&&series!=='Equipamento não seriado');if(duplicate){toast('Essa série já está cadastrada.');return}
-    if(id){const e=getEquipment(id);e.codeId=c.id;e.code=c.code;e.location=$('eqLocation').value.trim();e.productId=p.id;e.series=series;e.type=type;e.hce=hceData}
-    else state.equipments.push({id:uid('eq'),codeId:c.id,code:c.code,location:$('eqLocation').value.trim(),productId:p.id,series,type,hce:hceData})
+    if(id){const e=getEquipment(id);e.codeId=c.id;e.code=c.code;e.location=$('eqLocation').value.trim();e.productId=p.id;e.series=series;e.type=type;e.hce=hceData;if(accessory)e.balance=Math.max(1,Number(e.balance)||1);else delete e.balance}
+    else state.equipments.push({id:uid('eq'),codeId:c.id,code:c.code,location:$('eqLocation').value.trim(),productId:p.id,series,type,hce:hceData,...(accessory?{balance:1}:{})})
     save();closeModal('equipmentModal');renderAll();toast(id?'Equipamento atualizado.':'Equipamento cadastrado.')
 }
-function deleteEquipment(id){if(isInKit(id)){toast('Remova o equipamento do kit antes de excluir.');return}confirm('Excluir este equipamento?',()=>{state.equipments=state.equipments.filter(e=>e.id!==id);save();renderAll();toast('Equipamento excluído.')})}
+function deleteEquipment(id){
+ const e=getEquipment(id);if(!e)return;
+ if(isAccessoryEquipment(e)){
+   e.balance=Math.max(1,Number(e.balance)||1)-1;
+   if(e.balance<=0){state.equipments=state.equipments.filter(x=>x.id!==id);save();renderAll();toast('Última unidade removida. Acessório excluído.')}
+   else{save();renderAll();toast('Saldo reduzido para '+String(e.balance).padStart(2,'0')+' unidades.')}
+   return;
+ }
+ if(isInKit(id)){toast('Remova o equipamento do kit antes de excluir.');return}
+ confirm('Excluir este equipamento?',()=>{state.equipments=state.equipments.filter(e=>e.id!==id);save();renderAll();toast('Equipamento excluído.')})
+}
+let pendingDuplicateEquipmentId='';
+function duplicateOrAddEquipment(id){
+ const e=getEquipment(id);if(!e)return;
+ if(isAccessoryEquipment(e)){
+   e.balance=Math.max(1,Number(e.balance)||1)+1;save();renderAll();
+   toast('Saldo aumentado para '+String(e.balance).padStart(2,'0')+' unidades.');return;
+ }
+ pendingDuplicateEquipmentId=id;$('duplicateSeriesForm').reset();openModal('duplicateSeriesModal');setTimeout(()=>$('duplicateSeries').focus(),0);
+}
+function cancelDuplicateEquipment(){pendingDuplicateEquipmentId='';$('duplicateSeriesForm').reset();closeModal('duplicateSeriesModal')}
+function saveDuplicateEquipment(ev){
+ ev.preventDefault();const source=getEquipment(pendingDuplicateEquipmentId);if(!source){cancelDuplicateEquipment();return}
+ const series=$('duplicateSeries').value.trim();if(!series){$('duplicateSeries').focus();return}
+ if(state.equipments.some(e=>e.series===series&&series!=='Equipamento não seriado')){toast('Essa série já está cadastrada.');return}
+ state.equipments.push({id:uid('eq'),codeId:source.codeId,code:source.code,location:source.location,productId:source.productId,series,type:source.type||'',hce:{landstar:!!source.hce?.landstar,smartgo:!!source.hce?.smartgo}});
+ pendingDuplicateEquipmentId='';closeModal('duplicateSeriesModal');save();renderAll();toast('Equipamento duplicado com a nova série.');
+}
 function renderEquipmentTable(){
     const product=( $('filterProduct').value||'').toLowerCase().trim();const status=$('filterStatus').value;const type=$('filterType').value;const general=($('filterGeneral').value||'').toLowerCase().trim();
     const rows=state.equipments.filter(e=>{const p=getProduct(e.productId);const inKit=isInKit(e.id);const txt=[e.code,e.location,e.series].join(' ').toLowerCase();const prod=(p?.name||'').toLowerCase();if(product&&!prod.includes(product))return false;if(status==='available'&&inKit)return false;if(status==='kit'&&!inKit)return false;if(type==='none'&&e.type)return false;if(type&&type!=='none'&&e.type!==type)return false;if(general&&!txt.includes(general))return false;return true}).sort((a,b)=>(getProduct(a.productId)?.name||'').localeCompare(getProduct(b.productId)?.name||'','pt-BR'));
-    $('equipmentTable').innerHTML=rows.length?rows.map(e=>{const p=getProduct(e.productId);return `<tr><td>${esc(e.code)}</td><td>${esc(e.location)}</td><td><strong>${esc(p?.name||'Produto')}</strong></td><td>${equipmentMetricHtml(e)}</td><td>${esc(e.series)}</td><td>${esc(varsText(p))}</td><td>${isInKit(e.id)?'<span class="badge badge-yellow">Em kit</span>':'<span class="badge badge-green">Disponível</span>'}</td><td><div class="table-actions"><button class="btn btn-small" onclick="openEquipmentModal('${e.id}')">EDITAR</button><button class="btn btn-small btn-danger" onclick="deleteEquipment('${e.id}')">EXCLUIR</button></div></td></tr>`}).join(''):'<tr><td colspan="8"><div class="empty">Nenhum equipamento encontrado.</div></td></tr>';
+    $('equipmentTable').innerHTML=rows.length?rows.map(e=>{const p=getProduct(e.productId);return `<tr><td>${esc(e.code)}</td><td>${esc(e.location)}</td><td><strong>${esc(p?.name||'Produto')}</strong></td><td>${equipmentMetricHtml(e)}</td><td>${esc(e.series)}</td><td>${esc(varsText(p))}</td><td>${isAccessoryEquipment(e)?`<span class="badge badge-green">${String(Math.max(1,Number(e.balance)||1)).padStart(2,'0')} unidades</span>`:(isInKit(e.id)?'<span class="badge badge-yellow">Em kit</span>':'<span class="badge badge-green">Disponível</span>')}</td><td><div class="table-actions"><button class="btn btn-small" onclick="openEquipmentModal('${e.id}')">EDITAR</button><button class="btn btn-small btn-danger" onclick="deleteEquipment('${e.id}')">EXCLUIR</button><button class="btn btn-small" onclick="duplicateOrAddEquipment('${e.id}')">${isAccessoryEquipment(e)?'ADICIONAR':'DUPLICAR'}</button><button class="btn btn-small btn-primary" onclick="printStandaloneEquipmentLabel('${e.id}')">${isAccessoryEquipment(e)?'EAN/EAN':'QRCODE/EAN'}</button></div></td></tr>`}).join(''):'<tr><td colspan="8"><div class="empty">Nenhum equipamento encontrado.</div></td></tr>';
 }
 function clearEquipmentFilters(){$('filterProduct').value='';$('filterStatus').value='';$('filterType').value='';$('filterGeneral').value='';renderEquipmentTable()}
 
@@ -1595,19 +1624,19 @@ function deleteProduct(id){if(state.equipments.some(e=>e.productId===id)){toast(
 
 function renderBuilder(){
     const q=($('builderSearch').value||'').toLowerCase().trim();const pf=$('builderProduct').value;
-    const selected=new Set(selectedEquipment);const list=state.equipments.filter(e=>!isInKit(e.id)&&!selected.has(e.id)).filter(e=>{const p=getProduct(e.productId);const txt=[e.code,e.location,e.series,p?.name].join(' ').toLowerCase();return(!q||txt.includes(q))&&(!pf||e.productId===pf)});
+    const selected=new Set(selectedEquipment);const list=state.equipments.filter(e=>!isAccessoryEquipment(e)&&!isInKit(e.id)&&!selected.has(e.id)).filter(e=>{const p=getProduct(e.productId);const txt=[e.code,e.location,e.series,p?.name].join(' ').toLowerCase();return(!q||txt.includes(q))&&(!pf||e.productId===pf)});
     $('availableList').innerHTML=list.length?list.map(e=>{const p=getProduct(e.productId);return `<div class="equip-option"><div class="equip-info"><strong>${esc(p?.name||'Produto')}</strong><small>Cód. ${esc(e.code)} · ${esc(e.location)} · Série: ${esc(e.series)}${e.type?' · Tipo: '+esc(e.type):''}${hceText(e)?' · '+esc(hceText(e)):''}</small></div><button class="btn btn-small btn-primary" onclick="addSelected('${e.id}')">+</button></div>`}).join(''):'<div class="empty">Nenhum equipamento disponível.</div>';
     $('selectedList').innerHTML=selectedEquipment.length?selectedEquipment.map(id=>{const e=getEquipment(id);const p=getProduct(e?.productId);return `<div class="selected-item"><div><strong>${esc(p?.name||'Produto')}</strong><div class="hint">${esc(e?.series||'')}${e?.type?' · '+esc(e.type):''}${hceText(e)?' · '+esc(hceText(e)):''}</div></div><button class="btn btn-small btn-danger" onclick="removeSelected('${id}')">REMOVER</button></div>`}).join(''):'<div class="empty">Nenhum equipamento selecionado.</div>';$('selectedCount').textContent=selectedEquipment.length;
 }
-function addSelected(id){if(!selectedEquipment.includes(id)){selectedEquipment.push(id);renderBuilder()}}
+function addSelected(id){const e=getEquipment(id);if(e&&!isAccessoryEquipment(e)&&!selectedEquipment.includes(id)){selectedEquipment.push(id);renderBuilder()}}
 function removeSelected(id){selectedEquipment=selectedEquipment.filter(x=>x!==id);renderBuilder()}
 function createKit(){if(!selectedEquipment.length){toast('Adicione pelo menos um equipamento.');return}const created=now();const id=kitId();state.kits.push({id,name:id,createdAt:created,updatedAt:created,equipmentIds:[...selectedEquipment],ntrip:calcNtrip(selectedEquipment)});selectedEquipment=[];save();renderAll();toast('Kit '+id+' criado.')}
 
 function openKitEdit(id){const k=state.kits.find(x=>x.id===id);if(!k)return;editingKitId=id;editingKitEquipment=[...k.equipmentIds];$('kitEditTitle').textContent='Editar '+k.id;$('editKitName').value=k.name;renderEditKit();openModal('kitEditModal')}
 function renderEditKit(){$('editKitList').innerHTML=editingKitEquipment.length?editingKitEquipment.map(id=>{const e=getEquipment(id);const p=getProduct(e?.productId);return `<div class="selected-item"><div><strong>${esc(p?.name||'Produto')}</strong><div class="hint">Cód. ${esc(e?.code)} · Série: ${esc(e?.series)}${e?.type?' · Tipo: '+esc(e.type):''}${hceText(e)?' · '+esc(hceText(e)):''}</div></div><button class="btn btn-small btn-danger" onclick="removeFromEditingKit('${id}')">REMOVER</button></div>`}).join(''):'<div class="empty">Nenhum equipamento no kit.</div>';
-    const avail=state.equipments.filter(e=>!isInKit(e.id)&&!editingKitEquipment.includes(e.id));$('editKitAdd').innerHTML='<option value="">Selecione um equipamento...</option>'+avail.map(e=>{const p=getProduct(e.productId);return `<option value="${e.id}">${esc(p?.name||'Produto')} · ${esc(e.series)} · ${esc(e.location)}</option>`}).join('')
+    const avail=state.equipments.filter(e=>!isAccessoryEquipment(e)&&!isInKit(e.id)&&!editingKitEquipment.includes(e.id));$('editKitAdd').innerHTML='<option value="">Selecione um equipamento...</option>'+avail.map(e=>{const p=getProduct(e.productId);return `<option value="${e.id}">${esc(p?.name||'Produto')} · ${esc(e.series)} · ${esc(e.location)}</option>`}).join('')
 }
-function addToEditingKit(id){if(id&&!editingKitEquipment.includes(id)){editingKitEquipment.push(id);renderEditKit()}}
+function addToEditingKit(id){const e=getEquipment(id);if(id&&e&&!isAccessoryEquipment(e)&&!editingKitEquipment.includes(id)){editingKitEquipment.push(id);renderEditKit()}}
 function removeFromEditingKit(id){editingKitEquipment=editingKitEquipment.filter(x=>x!==id);renderEditKit()}
 function saveKitEdit(){if(!editingKitEquipment.length){toast('O kit precisa ter pelo menos um equipamento.');return}const k=state.kits.find(x=>x.id===editingKitId);if(!k)return;k.name=$('editKitName').value.trim()||'Kit sem nome';k.equipmentIds=[...editingKitEquipment];k.updatedAt=now();k.ntrip=calcNtrip(k.equipmentIds);save();closeModal('kitEditModal');renderAll();toast('Kit atualizado.')}
 function disassembleKit(id){const k=state.kits.find(x=>x.id===id);if(!k)return;confirm(`Desmontar ${k.id}? Os equipamentos serão liberados e o kit deixará de aparecer em Kits Ativos.`,()=>{state.kits=state.kits.filter(x=>x.id!==id);save();renderAll();toast('Kit desmontado.')})}
@@ -1700,6 +1729,51 @@ function buildKitLabelPdf(k,serialized,e){
  const mm=72/25.4,H=30*mm,L=50*mm,RX=53*mm,R=50*mm,M=3*mm,lx=M,lw=L-2*M,rx=RX+M,rw=R-2*M;let s='',info=`${e.code||''} ${e.location||''} S/N: ${e.series||''}`;
  s+=pdfTextCommand(k.name,lx,H-M-10,10,lw,true,'center');let qs=19*mm;s+=pdfQr(e.series,(L-qs)/2,M+5.5,qs);let fs=7.2;while(pdfApproxWidth(info,fs,true)>lw&&fs>5.3)fs-=.2;s+=pdfTextCommand(info,lx,M,fs,lw,true,'center');
  s+=pdfTextCommand(k.name,rx,H-M-10,10,rw,true,'center');let ean=getCode(e.codeId)?.ean||'',bh=11.5*mm,by=M+13.5;s+=pdfEan13Command(ean,rx,by,rw,bh);s+=pdfTextCommand(ean,rx,by-5.6,5.8,rw,true,'center');fs=7.2;while(pdfApproxWidth(info,fs,true)>rw&&fs>5.3)fs-=.2;s+=pdfTextCommand(info,rx,M,fs,rw,true,'center');return pdfDoc(s)
+}
+function isAccessoryEquipment(e){
+ return !!getProduct(e.productId)?.variables?.includes('Acessório');
+}
+function buildStandaloneEquipmentLabelPdf(e){
+ const mm=72/25.4,H=30*mm,L=50*mm,RX=53*mm,R=50*mm,M=3*mm,lx=M,lw=L-2*M,rx=RX+M,rw=R-2*M;
+ let s='',info=`${e.code||''} ${e.location||''} S/N: ${e.series||''}`,title='CPE - SP';
+ s+=pdfTextCommand(title,lx,H-M-10,10,lw,true,'center');
+ let qs=19*mm;s+=pdfQr(e.series,(L-qs)/2,M+5.5,qs);
+ let fs=7.2;while(pdfApproxWidth(info,fs,true)>lw&&fs>5.3)fs-=.2;
+ s+=pdfTextCommand(info,lx,M,fs,lw,true,'center');
+ s+=pdfTextCommand(title,rx,H-M-10,10,rw,true,'center');
+ let ean=getCode(e.codeId)?.ean||'',bh=11.5*mm,by=M+13.5;
+ s+=pdfEan13Command(ean,rx,by,rw,bh);
+ s+=pdfTextCommand(ean,rx,by-5.6,5.8,rw,true,'center');
+ fs=7.2;while(pdfApproxWidth(info,fs,true)>rw&&fs>5.3)fs-=.2;
+ s+=pdfTextCommand(info,rx,M,fs,rw,true,'center');
+ return pdfDoc(s);
+}
+function buildAccessoryEanLabelPdf(e){
+ const mm=72/25.4,H=30*mm,L=50*mm,RX=53*mm,R=50*mm,M=3*mm,lx=M,lw=L-2*M,rx=RX+M,rw=R-2*M;
+ const title='CPE - SP',ean=getCode(e.codeId)?.ean||'',product=getProduct(e.productId)?.name||'Produto';
+ const info=[e.code,product,e.location,'N/S'].filter(Boolean).join(' ');
+ let s='',bh=11.5*mm,by=M+13.5;
+ [ [lx,lw], [rx,rw] ].forEach(([x,w])=>{
+   s+=pdfTextCommand(title,x,H-M-10,10,w,true,'center');
+   s+=pdfEan13Command(ean,x,by,w,bh);
+   s+=pdfTextCommand(ean,x,by-5.6,5.8,w,true,'center');
+   let fs=7.2;while(pdfApproxWidth(info,fs,true)>w&&fs>4.8)fs-=.2;
+   s+=pdfTextCommand(info,x,M,fs,w,true,'center');
+ });
+ return pdfDoc(s);
+}
+function printStandaloneEquipmentLabel(id){
+ const e=getEquipment(id);
+ if(!e){toast('Equipamento não encontrado.');return}
+ const codeRecord=getCode(e.codeId);
+ if(!codeRecord?.ean||!validEan13(codeRecord.ean)){toast('O código '+(e.code||'')+' não possui um EAN-13 válido cadastrado.');return}
+ try{
+   if(isAccessoryEquipment(e))openPdfBytes(buildAccessoryEanLabelPdf(e),`${e.code} - EAN EAN`);
+   else{
+     if(!e.series||e.series==='Equipamento não seriado'){toast('Este equipamento não possui número de série para gerar o QR Code.');return}
+     openPdfBytes(buildStandaloneEquipmentLabelPdf(e),`${e.code} - QRCode EAN`);
+   }
+ }catch(err){console.error(err);toast('Não foi possível gerar a identificação do equipamento.')}
 }
 function buildCompleteKitLabelPdf(k,rows){
  const mm=72/25.4,H=30*mm,L=50*mm,RX=53*mm,R=50*mm,M=3*mm,lx=M,lw=L-2*M,rx=RX+M,rw=R-2*M;let s='',ks=21;while(pdfApproxWidth(k.name,ks,true)>lw&&ks>12)ks-=.3;s+=pdfTextCommand(k.name,lx,(H-ks)/2,ks,lw,true,'center');
